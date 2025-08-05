@@ -1,6 +1,10 @@
 /*changes:
--Made it so you can select and unselect the same number on the bottom repeatedly
--Added a backtracking solver to generate random boards
+    -Added a function that adds spaces to the board & changed some of the backtracking solver logic to accommodate that
+    -What used to be fillboard() is now backtracker()
+todo:
+    -Add difficulty buttons: easy should be 31 tiles, medium should be 26, hard should be 21
+    -Make UI pretty
+    -Add uniqueness check to backtracking solver
 */
 
 var numSelected = null;
@@ -12,26 +16,28 @@ var errors = 0;
 //https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
 function generateBoard()    {
     const board = Array(9).fill().map(() => Array(9).fill(0));
-    fillBoard(board);
+    backtracker(board, true);
     return board;
 }
-function fillBoard(board, row = 0, col = 0) {
+function backtracker(board, fill, row = 0, col = 0) {
     if(row==9) return true;  //base case
-    if(col==9) return fillBoard(board, row+1, 0);
-    if(board[row][col] != 0) return fillBoard(board, row, col+1);
+    if(col==9) return backtracker(board, fill, row+1, 0);
+    if(board[row][col] != 0) return backtracker(board, fill, row, col+1);
 
     //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for(let i = nums.length - 1; i > 0; i--)    {
-        let j = Math.floor(Math.random() * (i + 1));
-        let temp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = temp;
+    if(fill)    {
+        for(let i = nums.length - 1; i > 0; i--)    {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = temp;
+        }
     }
     for(const num of nums) {
         if(isValid(board, row, col, num))   {
             board[row][col] = num;
-            if(fillBoard(board, row, col+1)) return true;    //recurse
+            if(backtracker(board, fill, row, col+1)) return true;    //recurse
             board[row][col] = 0;    //backtrack
         }
     }
@@ -47,33 +53,51 @@ function isValid(board, row, col, num)  {
         if (board[r][col] == num) return false;
     }
     //3x3 check
-    const boxRow = Math.floor(row / 3) * 3;
-    const boxCol = Math.floor(col / 3) * 3;
+    const boxRow = Math.floor(row/3)*3;
+    const boxCol = Math.floor(col/3)*3;
     for (let r=0; r<3; r++) {
-        for (let c = 0; c < 3; c++) {
+        for (let c=0; c<3; c++) {
             if (board[boxRow + r][boxCol + c] == num) return false;
         }
     }
     return true;
 }
+function addEmptySpaces(board)  {
+    const newBoard = board.map(row => row.slice());
+    const positions = [];
+    for(let r=0; r<9; r++)  {
+        for(let c=0; c<9; c++)  {
+            positions.push({r,c});
+        }
+    }
+    for (let i = positions.length - 1; i>0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = positions[i];
+        positions[i] = positions[j];
+        positions[j] = temp;
+    }
+    var emptySpaces = 0
+    while(emptySpaces<50 && positions.length>0)  {  //only going to remove 50 spaces for now, this will vary in the future with difficulty options
+        let pos = positions.pop();
+        let row = pos.r, col = pos.c;
+        newBoard[row][col] = 0;
+        if(backtracker(newBoard.map(row => row.slice()), false, 0, 0))    {
+            emptySpaces++;
+        }
+        else    {
+            newBoard[row][col] = board[row][col];
+        }
+    }
+    return newBoard;
+}
 
+var solution;
 var board;
 
-var solution = [
-    "273594816",
-    "681273459",
-    "495186237",
-    "954362781",
-    "127849563",
-    "836751924",
-    "569418372",
-    "742635198",
-    "318927645"
-]
-
 window.onload = function() {
-    board = generateBoard();
-    console.log(board);
+    solution = generateBoard();
+    console.log(solution);  //remove
+    board = addEmptySpaces(solution);
     setGame();
 }
 
@@ -94,7 +118,7 @@ function setGame()  {
         for (let c=0; c<9; c++) {
             let tile = document.createElement("div");
             tile.id = r.toString() + "-" + c.toString();
-            if(board[r][c] != "-")  {
+            if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
             }
