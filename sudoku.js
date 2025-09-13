@@ -1,10 +1,10 @@
 /*changes:
-    -Added a function that adds spaces to the board & changed some of the backtracking solver logic to accommodate that
-    -What used to be fillboard() is now backtracker()
+    -Added a shuffle helper function
+    -Added uniqueness helper function
 todo:
+    -Refactor the backtracking function so the filling and solving functions are separate
     -Add difficulty buttons: easy should be 31 tiles, medium should be 26, hard should be 21
     -Make UI pretty
-    -Add uniqueness check to backtracking solver
 */
 
 var numSelected = null;
@@ -19,25 +19,29 @@ function generateBoard()    {
     backtracker(board, true);
     return board;
 }
+//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffle(arr)  {
+    for(let i = arr.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
 function backtracker(board, fill, row = 0, col = 0) {
-    if(row==9) return true;  //base case
-    if(col==9) return backtracker(board, fill, row+1, 0);
-    if(board[row][col] != 0) return backtracker(board, fill, row, col+1);
+    if(row==9)  { return true;  }  //base case
+    if(col==9)  { return backtracker(board, fill, row+1, 0);    }
+    if(board[row][col] != 0)    { return backtracker(board, fill, row, col+1);  }
 
-    //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     if(fill)    {
-        for(let i = nums.length - 1; i > 0; i--)    {
-            let j = Math.floor(Math.random() * (i + 1));
-            let temp = nums[i];
-            nums[i] = nums[j];
-            nums[j] = temp;
-        }
+        shuffle(nums);
     }
+
     for(const num of nums) {
         if(isValid(board, row, col, num))   {
             board[row][col] = num;
-            if(backtracker(board, fill, row, col+1)) return true;    //recurse
+            if(backtracker(board, fill, row, col+1)) { return true; }    //recurse
             board[row][col] = 0;    //backtrack
         }
     }
@@ -55,13 +59,31 @@ function isValid(board, row, col, num)  {
     //3x3 check
     const boxRow = Math.floor(row/3)*3;
     const boxCol = Math.floor(col/3)*3;
-    for (let r=0; r<3; r++) {
-        for (let c=0; c<3; c++) {
+    for(let r=0; r<3; r++) {
+        for(let c=0; c<3; c++) {
             if (board[boxRow + r][boxCol + c] == num) return false;
         }
     }
     return true;
 }
+function countSolutions(board, row = 0, col = 0) {
+    if(row == 9) {  return 1;   } //base case
+    if(col == 9) {  return countSolutions(board, row + 1, 0);   }
+    if(board[row][col] != 0) {  return countSolutions(board, row, col + 1); }
+
+    let total = 0;
+    for(let num = 1; num <= 9; num++) {
+        if(isValid(board, row, col, num)) {
+            board[row][col] = num;
+            total += countSolutions(board, row, col + 1);
+            board[row][col] = 0;
+
+            if(total>1) {   return total;   }
+        }
+    }
+    return total;
+}
+
 function addEmptySpaces(board)  {
     const newBoard = board.map(row => row.slice());
     const positions = [];
@@ -70,18 +92,13 @@ function addEmptySpaces(board)  {
             positions.push({r,c});
         }
     }
-    for (let i = positions.length - 1; i>0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        let temp = positions[i];
-        positions[i] = positions[j];
-        positions[j] = temp;
-    }
+    shuffle(positions);
     var emptySpaces = 0
     while(emptySpaces<50 && positions.length>0)  {  //only going to remove 50 spaces for now, this will vary in the future with difficulty options
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
-        if(backtracker(newBoard.map(row => row.slice()), false, 0, 0))    {
+        if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
             emptySpaces++;
         }
         else    {
