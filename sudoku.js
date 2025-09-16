@@ -1,15 +1,14 @@
 /*changes:
-    -Added a shuffle helper function
-    -Added uniqueness helper function
+    -Added a reset button as well as an easy, medium, and hard difficulty button
+    -Added a resetGame() function
 todo:
-    -Refactor the backtracking function so the filling and solving functions are separate
-    -Add difficulty buttons: easy should be 31 tiles, medium should be 26, hard should be 21
     -Make UI pretty
 */
 
 var numSelected = null;
 var prevTileSelected = null;
 var tileSelected = null;
+var difficulty = ""; //string, will either be "easy", "medium", or "hard"
 
 var errors = 0;
 
@@ -94,7 +93,13 @@ function addEmptySpaces(board)  {
     }
     shuffle(positions);
     var emptySpaces = 0
-    while(emptySpaces<50 && positions.length>0)  {  //only going to remove 50 spaces for now, this will vary in the future with difficulty options
+    const difficultyValues = {
+        easy: 31,
+        medium: 26,
+        hard: 21
+    }
+    let tilesToKeep = 81 - difficultyValues[difficulty];
+    while(emptySpaces<tilesToKeep && positions.length>0)  { 
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
@@ -112,14 +117,16 @@ var solution;
 var board;
 
 window.onload = function() {
-    solution = generateBoard();
-    console.log(solution);  //remove
-    board = addEmptySpaces(solution);
+    difficulty = "easy";
+    document.getElementById("easy").classList.add("easy-clicked");
     setGame();
 }
 
 function setGame()  {
-    //Digits 1-9
+    solution = generateBoard();
+    console.log(solution);  //remove
+    board = addEmptySpaces(solution);
+    //Playable Digits 1-9
     for (let i=1; i<=9; i++) {
         //generates 9 <div id="1" class="number">1</div> which are number class objects in the digits id
         let number = document.createElement("div");
@@ -148,6 +155,34 @@ function setGame()  {
             tile.addEventListener("click", selectTile);
             tile.classList.add("tile");
             document.getElementById("board").append(tile);
+        }
+    }
+    //Buttons
+    document.getElementById("reset").addEventListener("click", resetGame);
+    document.getElementById("easy").addEventListener("click", setDifficulty);
+    document.getElementById("medium").addEventListener("click", setDifficulty);
+    document.getElementById("hard").addEventListener("click", setDifficulty);
+}
+
+function resetGame()  {
+    solution = generateBoard();
+    console.log(solution);  //remove
+    board = addEmptySpaces(solution);
+    errors = 0;
+    document.getElementById("errors").innerText = errors;
+
+    for (let r=0; r<9; r++) {
+        for (let c=0; c<9; c++) {
+            let tile = document.getElementById(r.toString() + "-" + c.toString());
+
+            if(board[r][c] != 0)  {
+                tile.innerText = board[r][c];
+                tile.classList.add("tile-start");
+            }
+            else {
+                tile.innerText = "";
+                tile.classList.remove("tile-start");
+            }
         }
     }
 }
@@ -184,5 +219,15 @@ function selectTile()   {
             errors += 1;
             document.getElementById("errors").innerText = errors;
         }
+    }
+}
+
+function setDifficulty()    {
+    var newDifficulty = this.id;
+    if(newDifficulty != difficulty) {
+        document.getElementById(difficulty).classList.remove(difficulty + "-clicked");
+        document.getElementById(newDifficulty).classList.add(newDifficulty + "-clicked");
+        difficulty = newDifficulty;
+        resetGame();
     }
 }

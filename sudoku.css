@@ -1,3 +1,6 @@
+:root {
+    --font-size: 28px;
+}
 body {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     text-align: center;
@@ -5,9 +8,15 @@ body {
 hr  {
     width: 500px;
 }
-
+h1 {    
+    font-size: var(--font-size);
+    margin: auto;
+}
 #errors {
+    font-size: var(--font-size);
     color: red;
+    margin: auto;
+    padding-bottom: 5px;
 }
 
 #board  {
@@ -68,3 +77,56 @@ hr  {
 .vertical-line  {
     border-right: 1px solid black;
 }
+
+#reset  {
+    width: 70px;
+    position: fixed;  
+    top: 10px;       
+    left: 10px;         
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#reset:active   {
+    background: red;
+}
+    #easy  {
+        width: 70px;
+        position: fixed;  
+        top: 54px;
+        left: 10px;        
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .easy-clicked  {
+        background-color: lime;
+    }
+    #medium  {
+        width: 70px;
+        position: fixed;  
+        top: 98px;
+        left: 10px;        
+        padding: 8px 3px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .medium-clicked  {
+        background-color: blue;
+    }
+    #hard  {
+        width: 70px;
+        position: fixed;  
+        top: 142px;
+        left: 10px;        
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .hard-clicked  {
+        background-color: red;
+    }
