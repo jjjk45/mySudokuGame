@@ -1,8 +1,15 @@
 /*changes:
-    -Added a reset button as well as an easy, medium, and hard difficulty button
-    -Added a resetGame() function
+    -Added cursor: pointer when hovering on interactive elements
+    -Made buttons wider
 todo:
     -Make UI pretty
+    -Add debug mode -- maybe in handburger menu
+        - add tracker that shows how many masks were added, its not always feasible to have <~25 clues
+        - console.log
+    -Add unit tests
+    -Add enclosures to obscure sudoku generation logic
+    -Add stopwatch
+    -Add notes functionality
 */
 
 var numSelected = null;
@@ -11,13 +18,9 @@ var tileSelected = null;
 var difficulty = ""; //string, will either be "easy", "medium", or "hard"
 
 var errors = 0;
+var solution;
+var board;
 
-//https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
-function generateBoard()    {
-    const board = Array(9).fill().map(() => Array(9).fill(0));
-    backtracker(board, true);
-    return board;
-}
 //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(arr)  {
     for(let i = arr.length - 1; i > 0; i--) {
@@ -113,8 +116,12 @@ function addEmptySpaces(board)  {
     return newBoard;
 }
 
-var solution;
-var board;
+//https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
+function generateBoard()    {
+    const board = Array(9).fill().map(() => Array(9).fill(0));
+    backtracker(board, true);
+    return board;
+}
 
 window.onload = function() {
     difficulty = "easy";
@@ -124,7 +131,7 @@ window.onload = function() {
 
 function setGame()  {
     solution = generateBoard();
-    console.log(solution);  //remove
+    //console.log(solution);  //debug mode
     board = addEmptySpaces(solution);
     //Playable Digits 1-9
     for (let i=1; i<=9; i++) {
@@ -166,7 +173,7 @@ function setGame()  {
 
 function resetGame()  {
     solution = generateBoard();
-    console.log(solution);  //remove
+    //console.log(solution);  //debug mode
     board = addEmptySpaces(solution);
     errors = 0;
     document.getElementById("errors").innerText = errors;

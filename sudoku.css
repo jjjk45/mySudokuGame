@@ -1,5 +1,5 @@
 :root {
-    --font-size: 28px;
+    --header-font-size: 28px;
 }
 body {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -38,6 +38,7 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 #digits {
     height: 50px;
@@ -60,6 +61,7 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .number-selected    {
@@ -68,6 +70,7 @@ h1 {
 
 .tile-start {
     background-color: whitesmoke;
+    cursor: default;
 }
 
 .horizontal-line    {
@@ -79,7 +82,7 @@ h1 {
 }
 
 #reset  {
-    width: 70px;
+    width: 140px;
     position: fixed;  
     top: 10px;       
     left: 10px;         
@@ -92,7 +95,7 @@ h1 {
     background: red;
 }
     #easy  {
-        width: 70px;
+        width: 140px;
         position: fixed;  
         top: 54px;
         left: 10px;        
@@ -105,11 +108,11 @@ h1 {
         background-color: lime;
     }
     #medium  {
-        width: 70px;
+        width: 140px;
         position: fixed;  
         top: 98px;
         left: 10px;        
-        padding: 8px 3px;
+        padding: 8px 12px;
         font-size: 16px;
         border-radius: 6px;
         cursor: pointer;
@@ -118,7 +121,7 @@ h1 {
         background-color: blue;
     }
     #hard  {
-        width: 70px;
+        width: 140px;
         position: fixed;  
         top: 142px;
         left: 10px;        
