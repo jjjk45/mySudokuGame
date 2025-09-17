@@ -9,11 +9,11 @@ hr  {
     width: 500px;
 }
 h1 {    
-    font-size: var(--font-size);
+    font-size: var(--header-font-size);
     margin: auto;
 }
 #errors {
-    font-size: var(--font-size);
+    font-size: var(--header-font-size);
     color: red;
     margin: auto;
     padding-bottom: 5px;
