@@ -1,0 +1,135 @@
+:root {
+    --header-font-size: 28px;
+}
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    text-align: center;
+}
+hr  {
+    width: 500px;
+}
+h1 {
+    font-size: var(--header-font-size);
+    margin: auto;
+}
+#errors {
+    font-size: var(--header-font-size);
+    color: red;
+    margin: auto;
+    padding-bottom: 5px;
+}
+
+#board  {
+    height: 450px;
+    width: 450px;
+
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+.tile   {
+    width: 48px;
+    height: 48px;
+    border: 1px solid lightgray;
+
+    /* text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+#digits {
+    height: 50px;
+    width: 450px;
+
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.number {
+    width: 44px;
+    height: 44px;
+    margin: 2px;
+    border: 1px solid black;
+
+    /* text */
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.number-selected    {
+    background-color:  gray;
+}
+
+.tile-start {
+    background-color: whitesmoke;
+    cursor: default;
+}
+
+.horizontal-line    {
+    border-bottom: 1px solid black;
+}
+
+.vertical-line  {
+    border-right: 1px solid black;
+}
+
+#reset  {
+    width: 140px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#reset:active   {
+    background: red;
+}
+    #easy  {
+        width: 140px;
+        position: fixed;
+        top: 54px;
+        left: 10px;
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .easy-clicked  {
+        background-color: lime;
+    }
+    #medium  {
+        width: 140px;
+        position: fixed;
+        top: 98px;
+        left: 10px;
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .medium-clicked  {
+        background-color: blue;
+    }
+    #hard  {
+        width: 140px;
+        position: fixed;
+        top: 142px;
+        left: 10px;
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .hard-clicked  {
+        background-color: red;
+    }
