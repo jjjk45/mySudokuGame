@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sudoku</title>
+        <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="sudoku.css">
+        <script src="sudoku.js"></script>
+    </head>
+    <body>
+        <h1>Sudoku</h1>
+        <hr>
+        <h2 id="errors" title="Errors">0</h2>
+
+        <!-- 9x9 Board -->
+         <div id="board"></div>
+         <br>
+         <div id="digits"></div>
+
+         <button id="reset" onclick="resetGame()">Reset</button>
+         <button id="easy">Easy</button>
+         <button id="medium">Medium</button>
+         <button id="hard">Hard</button>
+         <button id="veryHard">Very Hard</button>
+         <button id="hint" onclick="giveHint()">Hint</button>
+    </body>
+</html>
