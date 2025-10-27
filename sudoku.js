@@ -1,9 +1,10 @@
 /*changes:
-    -Added a MinRV and MaxRV function to make giving hints and solving boards automatically easier/faster when I implement that
-    -Changed backtracker to fillRandomBoard and got rid of the optional fill parameter since filling/generating is the only use and having a big dumb function like that is big dumb
-    -Really fleshed out my todo list
-    -Turned Math.floors to ~~ (actually faster? who knows)
-    -Changed every var to let (var is function scoped which is bad, let is block scoped which is good, I don't fully understand)
+    -Added hint button and getHint() method, still working on it
+    -Made the board sit in a grid instead of a flex
+    -Implemeted MinimumRV in the countSolutions function to make it much faster
+    -added console logging for number of starting tiles, its rare for hard to actually generate a real hard board
+    -Changed difficulties because medium and hard were often generating the same
+        -Now when generating new boards the starting tiles are; Easy - 45, Medium - 37, Hard - 29, Very Hard - Averages to like 25 but I have seen 22
 
 todo:
     -Make UI pretty -- Add hamburger menu that folds downward when you press a symbol in the top-left
@@ -33,8 +34,10 @@ todo:
 let numSelected = null;
 let prevTileSelected = null;
 let tileSelected = null;
-let difficulty = ""; //@type string, will either be "easy", "medium", or "hard"
+let difficulty = ""; //@type string, will either be "easy", "medium", "hard", or "very hard"
+let emptySpaces = 0;
 
+let hintsLeft = 3;
 let errors = 0;
 let solution;
 let board;
@@ -84,20 +87,19 @@ function isValid(board, row, col, num)  {
     }
     return true;
 }
-function countSolutions(board, row = 0, col = 0) {
-    if(row == 9) {  return 1;   } //base case
-    if(col == 9) {  return countSolutions(board, row + 1, 0);   }
-    if(board[row][col] != 0) {  return countSolutions(board, row, col + 1); }
+function countSolutions(board) {
+    let { r, c, candidates } = bestCell(board, "min");
+    if (r === null) { return 1; }
 
     let total = 0;
-    for(let num = 1; num <= 9; num++) {
-        if(isValid(board, row, col, num)) {
-            board[row][col] = num;
-            total += countSolutions(board, row, col + 1);
-            board[row][col] = 0;
-
-            if(total>1) { return total; }
+    for (let num of candidates) {
+        board[r][c] = num;
+        total += countSolutions(board);
+        if (total > 1) {
+            board[r][c] = 0;
+            return total;
         }
+        board[r][c] = 0; // backtrack
     }
     return total;
 }
@@ -110,14 +112,15 @@ function addEmptySpaces(board)  {
         }
     }
     shuffle(positions);
-    let emptySpaces = 0
+    emptySpaces = 0
     const difficultyValues = {
-        easy: 31,
-        medium: 26,
-        hard: 21
+        easy: 45,
+        medium: 37,
+        hard: 29,
+        veryHard: 17 //never seen it generate below 21 but i bet its possible
     }
     let tilesToKeep = 81 - difficultyValues[difficulty];
-    while(emptySpaces<tilesToKeep && positions.length>0)  { 
+    while(emptySpaces<tilesToKeep && positions.length>0)  {
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
@@ -138,7 +141,6 @@ function addEmptySpaces(board)  {
  */
 function bestCell(brd, mode)  {
     let best = { r: null, c: null, candidates : [] };
-    
     if(!brd)    {
         console.error('board error in bestCell()');
         return best;
@@ -177,6 +179,18 @@ function bestCell(brd, mode)  {
         }
     }
     return best;
+}
+function giveHint() {
+    if(hintsLeft < 1)   { return; }
+    hintsLeft -= 1;
+    let { r, c, candidates } = bestCell(board,"min"); //maybe do max, will revisit
+    console.log(`${r}-${c} can only be ${candidates}`); //change later
+    let tile = document.getElementById(r.toString() + "-" + c.toString());
+    tile.classList.add("tile-hint");
+    return;
+}
+function clearHints() {
+    document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
 }
 
 //https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
@@ -218,20 +232,22 @@ function setGame()  {
             }
             if(r==2 || r==5)    {
                 tile.classList.add("horizontal-line");
-            }   
+            }
             if(c==2 || c==5)    {
                 tile.classList.add("vertical-line");
             }
             tile.addEventListener("click", selectTile);
             tile.classList.add("tile");
-            document.getElementById("board").append(tile);
+            document.getElementById("board").appendChild(tile);
         }
     }
     //Buttons
-    document.getElementById("reset").addEventListener("click", resetGame);
     document.getElementById("easy").addEventListener("click", setDifficulty);
     document.getElementById("medium").addEventListener("click", setDifficulty);
     document.getElementById("hard").addEventListener("click", setDifficulty);
+    document.getElementById("veryHard").addEventListener("click", setDifficulty);
+
+    console.log(`game set: ${81-emptySpaces} starting tiles`);
 }
 
 function resetGame()  {
@@ -239,6 +255,7 @@ function resetGame()  {
     //console.log(solution);  //debug mode
     board = addEmptySpaces(solution);
     errors = 0;
+    hintsLeft = 3;
     document.getElementById("errors").innerText = errors;
 
     for (let r=0; r<9; r++) {
@@ -254,6 +271,9 @@ function resetGame()  {
             }
         }
     }
+
+    clearHints();
+    console.log(`game reset: ${81 - emptySpaces} starting tiles`);
 }
 
 function selectNumber() {
@@ -264,7 +284,7 @@ function selectNumber() {
         numSelected = null;
         return;
     }
-    numSelected = this;   
+    numSelected = this;
     numSelected.classList.add("number-selected");
     //document.getElementById("h1").innerHTML= "yurp";  doesnt work idk why
 }
@@ -286,7 +306,9 @@ function selectTile()   {
             errors += 1;
             document.getElementById("errors").innerText = errors;
         }
+        clearHints();
     }
+    return;
 }
 
 function setDifficulty()    {
