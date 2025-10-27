@@ -1,40 +1,7 @@
-/*changes:
-    -Added hint button and getHint() method, still working on it
-    -Made the board sit in a grid instead of a flex
-    -Implemeted MinimumRV in the countSolutions function to make it much faster
-    -added console logging for number of starting tiles, its rare for hard to actually generate a real hard board
-    -Changed difficulties because medium and hard were often generating the same
-        -Now when generating new boards the starting tiles are; Easy - 45, Medium - 37, Hard - 29, Very Hard - Averages to like 25 but I have seen 22
-
-todo:
-    -Make UI pretty -- Add hamburger menu that folds downward when you press a symbol in the top-left
-        - Reset and difficulty buttons
-        - Options
-            - Screenshake on errors
-            - # of errors allowed before forced reset
-            - Celebration on puzzle completion
-        - Hints -- limit to 3
-            - implement it so the tile with the most possible choices is told
-        - Solve for me
-        - Special sudoku puzzles - not random, prefilled famous versions, maybe even impossible versions
-    -Add debug mode
-        - add tracker that shows how many masks/empty spaces were added, its not always feasible to have <~25 clues
-        - add console.log -- board, solutions, and mask application time
-    -Add unit tests
-    -Add enclosures to obscure sudoku generation logic
-    -Add stopwatch
-    -Add notes functionality
-    -Add more function hints for readability
-    -Make program behavior more readable with better function ordering
-    -Add more error checks for bad parameters, I like console.warn
-    -I want to add seeds for random boards and ideally implement it with a leaderboard for who solved a seed the fastest/with the least errors
-        - maybe add users and include how many they've solved
-*/
-
 let numSelected = null;
 let prevTileSelected = null;
 let tileSelected = null;
-let difficulty = ""; //@type string, will either be "easy", "medium", "hard", or "very hard"
+let difficulty = "";
 let emptySpaces = 0;
 
 let hintsLeft = 3;
@@ -42,17 +9,16 @@ let errors = 0;
 let solution;
 let board;
 
-//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(arr)  {
     for(let i = arr.length - 1; i > 0; i--) {
-        let j = ~~(Math.random() * (i + 1)); //faster way to truncate/floor in js, I might remove
+        let j = ~~(Math.random() * (i + 1));
         let temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 }
-function fillRandomBoard(board, row = 0, col = 0) { //I should rename this and change the params so it always fills, since the only time i call it i use the fill
-    if(row==9)  { return true;  }  //base case
+function fillRandomBoard(board, row = 0, col = 0) {
+    if(row==9)  { return true;  }
     if(col==9)  { return fillRandomBoard(board, row+1, 0);    }
     if(board[row][col] != 0)    { return fillRandomBoard(board, row, col+1);  }
 
@@ -62,22 +28,22 @@ function fillRandomBoard(board, row = 0, col = 0) { //I should rename this and c
     for(const num of nums) {
         if(isValid(board, row, col, num))   {
             board[row][col] = num;
-            if(fillRandomBoard(board, row, col+1)) { return true; }    //recurse
-            board[row][col] = 0;    //backtrack
+            if(fillRandomBoard(board, row, col+1)) { return true; }
+            board[row][col] = 0;
         }
     }
     return false;
 }
 function isValid(board, row, col, num)  {
-    //row check
+
     for(let c=0; c<9; c++)  {
         if (board[row][c] == num) return false;
     }
-    //column check
+
     for(let r=0; r<9; r++)  {
         if (board[r][col] == num) return false;
     }
-    //3x3 check
+
     const boxRow = ~~(row/3)*3;
     const boxCol = ~~(col/3)*3;
     for(let r=0; r<3; r++) {
@@ -99,7 +65,7 @@ function countSolutions(board) {
             board[r][c] = 0;
             return total;
         }
-        board[r][c] = 0; // backtrack
+        board[r][c] = 0;
     }
     return total;
 }
@@ -117,7 +83,7 @@ function addEmptySpaces(board)  {
         easy: 45,
         medium: 37,
         hard: 29,
-        veryHard: 17 //never seen it generate below 21 but i bet its possible
+        veryHard: 17
     }
     let tilesToKeep = 81 - difficultyValues[difficulty];
     while(emptySpaces<tilesToKeep && positions.length>0)  {
@@ -153,7 +119,7 @@ function bestCell(brd, mode)  {
     } else {
         console.warn(`Unknown mode "${mode}" in bestCell(), defaulting to "min"`);
         bestCount = 10;
-        mode = "min"; //reset mode to avoid confusion later
+        mode = "min";
     }
 
     for(let r=0; r<9; r++)  {
@@ -169,7 +135,7 @@ function bestCell(brd, mode)  {
                 if(mode==="min" && candidates.length < bestCount) {
                     bestCount = candidates.length;
                     best = { r, c, candidates: candidates.slice() };
-                    if(bestCount === 1) { return best }; //early exit
+                    if(bestCount === 1) { return best };
                 }
                 else if(mode==="max" && candidates.length > bestCount) {
                     bestCount = candidates.length;
@@ -183,8 +149,8 @@ function bestCell(brd, mode)  {
 function giveHint() {
     if(hintsLeft < 1)   { return; }
     hintsLeft -= 1;
-    let { r, c, candidates } = bestCell(board,"min"); //maybe do max, will revisit
-    console.log(`${r}-${c} can only be ${candidates}`); //change later
+    let { r, c, candidates } = bestCell(board,"min");
+    console.log(`${r}-${c} can only be ${candidates}`);
     let tile = document.getElementById(r.toString() + "-" + c.toString());
     tile.classList.add("tile-hint");
     return;
@@ -193,7 +159,7 @@ function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
 }
 
-//https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
+
 function generateBoard()    {
     const board = Array(9).fill().map(() => Array(9).fill(0));
     fillRandomBoard(board);
@@ -208,11 +174,11 @@ window.onload = function() {
 
 function setGame()  {
     solution = generateBoard();
-    //console.log(solution);  //debug mode
+
     board = addEmptySpaces(solution);
-    //Playable Digits 1-9
+
     for (let i=1; i<=9; i++) {
-        //generates 9 <div id="1" class="number">1</div> which are number class objects in the digits id
+
         let number = document.createElement("div");
         number.id = i;
         number.innerText = i;
@@ -221,7 +187,7 @@ function setGame()  {
         document.getElementById("digits").appendChild(number);
     }
 
-    //Board 9x9
+
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
             let tile = document.createElement("div");
@@ -241,7 +207,7 @@ function setGame()  {
             document.getElementById("board").appendChild(tile);
         }
     }
-    //Buttons
+
     document.getElementById("easy").addEventListener("click", setDifficulty);
     document.getElementById("medium").addEventListener("click", setDifficulty);
     document.getElementById("hard").addEventListener("click", setDifficulty);
@@ -252,7 +218,7 @@ function setGame()  {
 
 function resetGame()  {
     solution = generateBoard();
-    //console.log(solution);  //debug mode
+
     board = addEmptySpaces(solution);
     errors = 0;
     hintsLeft = 3;
@@ -286,7 +252,7 @@ function selectNumber() {
     }
     numSelected = this;
     numSelected.classList.add("number-selected");
-    //document.getElementById("h1").innerHTML= "yurp";  doesnt work idk why
+
 }
 
 function selectTile()   {
@@ -294,7 +260,7 @@ function selectTile()   {
         prevTileSelected = tileSelected;
         tileSelected = this;
         if (this.innerText!="") { return; }
-        // "0-0" "0-1" ... "3-1"
+
         const coords = this.id.split("-");
         let r = parseInt(coords[0]);
         let c = parseInt(coords[1]);
