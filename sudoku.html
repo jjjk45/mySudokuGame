@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Sudoku</title>
         <meta charset="UTF-8">
 
@@ -17,11 +18,14 @@
          <br>
          <div id="digits"></div>
 
-         <button id="reset" onclick="resetGame()">Reset</button>
-         <button id="easy">Easy</button>
-         <button id="medium">Medium</button>
-         <button id="hard">Hard</button>
-         <button id="veryHard">Very Hard</button>
-         <button id="hint" onclick="giveHint()">Hint</button>
+         <div id="button-container">
+            <button id="reset" onclick="resetGame()">Reset</button>
+            <button id="easy">Easy</button>
+            <button id="medium">Medium</button>
+            <button id="hard">Hard</button>
+            <button id="veryHard">Very Hard</button>
+            <button id="hint">Hint</button>
+            <button id="solve">Auto Solve</button>
+        </div>
     </body>
 </html>

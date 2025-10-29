@@ -1,10 +1,8 @@
 /*changes:
-    -Added hint button and getHint() method, still working on it
-    -Made the board sit in a grid instead of a flex
-    -Implemeted MinimumRV in the countSolutions function to make it much faster
-    -added console logging for number of starting tiles, its rare for hard to actually generate a real hard board
-    -Changed difficulties because medium and hard were often generating the same
-        -Now when generating new boards the starting tiles are; Easy - 45, Medium - 37, Hard - 29, Very Hard - Averages to like 25 but I have seen 22
+    - Added asynchronous autoSolve function
+    - Changed clearhints to clearTiles
+    - Made it mobile friendly-ish
+    - Put the buttons in an html container
 
 todo:
     -Make UI pretty -- Add hamburger menu that folds downward when you press a symbol in the top-left
@@ -41,6 +39,9 @@ let hintsLeft = 3;
 let errors = 0;
 let solution;
 let board;
+
+let solving = false;
+let cancelSolve = false;
 
 //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(arr)  {
@@ -133,7 +134,7 @@ function addEmptySpaces(board)  {
     return newBoard;
 }
 /**
- * @param {int[][]} brd - the board the user is currently playing on
+ * @param {int[][]} brd - the board the user is currently playing on, with all the numbers they added
  * @param {"min" | "max"} mode - the heuristic, minimum remaining value or maximum
  * @returns row, column, int[] - object that contains the best cell location and the number of possible valid entries/candidates
  * @abstract NO CHECKING IF THERE ISN'T ANY EMPTY CELLS SHOULD CHECK FOR THAT WHEN FUNCTION IS CALLED
@@ -189,9 +190,33 @@ function giveHint() {
     tile.classList.add("tile-hint");
     return;
 }
-function clearHints() {
+function clearTiles() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
+    document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
 }
+
+
+async function autoSolve() {
+    if(cancelSolve == true) { return false; }
+    let { r, c, candidates } = bestCell(board, "min");
+    if (r === null || c === null) return true;
+
+    for (const num of candidates) {
+        board[r][c] = num;
+        document.getElementById(`${r}-${c}`).innerText = num;
+        document.getElementById(`${r}-${c}`).classList.add("tile-solve");
+
+        await new Promise(res => setTimeout(res, 0));
+
+        if (await autoSolve()) { return true; }
+
+        board[r][c] = 0;
+        document.getElementById(`${r}-${c}`).innerText = "";
+        document.getElementById(`${r}-${c}`).classList.remove("tile-solve");
+    }
+    return false;
+}
+
 
 //https://stackoverflow.com/questions/6924216/how-to-generate-sudoku-boards-with-unique-solutions
 function generateBoard()    {
@@ -213,7 +238,7 @@ function setGame()  {
     //Playable Digits 1-9
     for (let i=1; i<=9; i++) {
         //generates 9 <div id="1" class="number">1</div> which are number class objects in the digits id
-        let number = document.createElement("div");
+        let number = document.createElement("numb");
         number.id = i;
         number.innerText = i;
         number.addEventListener("click", selectNumber);
@@ -246,6 +271,16 @@ function setGame()  {
     document.getElementById("medium").addEventListener("click", setDifficulty);
     document.getElementById("hard").addEventListener("click", setDifficulty);
     document.getElementById("veryHard").addEventListener("click", setDifficulty);
+    document.getElementById("hint").addEventListener("click", giveHint);
+    document.getElementById("solve").addEventListener("click", async () => {
+        if(solving) { return; }
+        solving = true;
+        cancelSolve = false;
+        document.getElementById("solve").disabled = true;
+        await autoSolve();
+        solving = false;
+        document.getElementById("solve").disabled = false;
+    });
 
     console.log(`game set: ${81-emptySpaces} starting tiles`);
 }
@@ -272,7 +307,7 @@ function resetGame()  {
         }
     }
 
-    clearHints();
+    clearTiles();
     console.log(`game reset: ${81 - emptySpaces} starting tiles`);
 }
 
@@ -306,7 +341,7 @@ function selectTile()   {
             errors += 1;
             document.getElementById("errors").innerText = errors;
         }
-        clearHints();
+        clearTiles();
     }
     return;
 }
