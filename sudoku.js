@@ -126,6 +126,7 @@ function addEmptySpaces(board)  {
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
         if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
+        if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
             emptySpaces++;
         } else  {
             newBoard[row][col] = board[row][col];
