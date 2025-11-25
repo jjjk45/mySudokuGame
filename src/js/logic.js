@@ -25,11 +25,13 @@ function shuffle(arr)  {
 }
 
 /**
- * @param {int[][]} brd - the board matrix you pass in
- * @param {"min" | "max"} mode - the heuristic, minimum remaining value or maximum
- * @returns row, column, int[] - object that contains the best cell location and the number of possible valid entries/candidates
- * @abstract NO CHECKING IF THERE ISN'T ANY EMPTY CELLS SHOULD CHECK FOR THAT WHEN FUNCTION IS CALLED
- * @abstract doesn't check if board is 9x9 but row and column array checks are hardcoded for a 9x9 board hmmm
+ * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
+ * @param {"min" | "max"} mode - Heuristic:  "min" = cell with fewest possible candidates, "max" = cell with most possible candidates
+ * @returns {{ r: number|null, c: number|null, candidates: number[] }}
+ *        Object with row, column of the best cell, and array of valid candidates.
+ *        If no empty cells exist, r and c are null and candidates is empty.
+ * @throws will log error if mode is not "min" or "max"
+ * @note doesn't check if board is 9x9 but row and column array checks are hardcoded for a 9x9 board hmmm
  */
 function bestCell(brd, mode)  {
     let best = { r: null, c: null, candidates : [] };
@@ -130,6 +132,7 @@ function countSolutions(brd) {
     return total;
 }
 
+//export for unit tests
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         createGame,
