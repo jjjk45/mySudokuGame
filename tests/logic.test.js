@@ -1,4 +1,4 @@
-const { bestCell } = require('../src/js/logic');
+import { bestCell } from "../src/js/logic";
 
 describe('bestCell() -- finds the best empty cell (0 = empty) by min or max remaining candidates', () => {
     describe('mode = "min"', () => {
@@ -102,7 +102,7 @@ describe('bestCell() -- finds the best empty cell (0 = empty) by min or max rema
         });
     });
     test('invalid mode logs error and defaults to "min"', () => {
-        console.error = jest.fn(); //needs fixing later, console.error mock can leak state into other tests
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const board = [
             [1,2,3,4,5,6,7,8,9],
             [2,3,4,5,6,7,8,9,1],
@@ -116,6 +116,7 @@ describe('bestCell() -- finds the best empty cell (0 = empty) by min or max rema
         ];
         const res = bestCell(board, 'goo');
         expect(console.error).toHaveBeenCalledWith('Unknown mode "goo" in bestCell(), defaulting to "min"');
+        errorSpy.mockRestore();
         expect(res.r).toBeNull();
         expect(res.c).toBeNull();
         expect(res.candidates).toEqual([]);

@@ -132,14 +132,11 @@ function countSolutions(brd) {
     return total;
 }
 
-//export for unit tests
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        createGame,
-        shuffle,
-        bestCell,
-        fillRandomBoard,
-        isValid,
-        countSolutions
-    };
-}
+export {
+    createGame,
+    shuffle,
+    bestCell,
+    fillRandomBoard,
+    isValid,
+    countSolutions
+};
