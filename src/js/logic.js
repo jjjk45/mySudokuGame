@@ -26,8 +26,33 @@ function shuffle(arr)  {
 
 /**
  * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
+ * @param {int} row - row index (0-8)
+ * @param {int} col - column index (0-8)
+ * @param {int} num - number to check (1-9)
+ * @returns boolean - true if num can be placed at brd[row][col] without violating Sudoku rules
+ * @note can return true for numbers >9 or <1 if they are not present in the row, column, or box
+ */
+function isValid(brd, row, col, num)  {
+    for(let c=0; c<9; c++)  {
+        if(brd[row][c] == num) { return false; }
+    }
+    for(let r=0; r<9; r++)  {
+        if(brd[r][col] == num) { return false; }
+    }
+    const boxRow = ~~(row/3)*3;
+    const boxCol = ~~(col/3)*3;
+    for(let r=0; r<3; r++) {
+        for(let c=0; c<3; c++) {
+            if(brd[boxRow + r][boxCol + c] == num) { return false; }
+        }
+    }
+    return true;
+}
+
+/**
+ * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
  * @param {"min" | "max"} mode - Heuristic:  "min" = cell with fewest possible candidates, "max" = cell with most possible candidates
- * @returns {{ r: number|null, c: number|null, candidates: number[] }}
+ * @returns {{ r: int|null, c: int|null, candidates: int[] }}
  *        Object with row, column of the best cell, and array of valid candidates.
  *        If no empty cells exist, r and c are null and candidates is empty.
  * @throws will log error if mode is not "min" or "max"
@@ -47,7 +72,7 @@ function bestCell(brd, mode)  {
     } else {
         console.error(`Unknown mode "${mode}" in bestCell(), defaulting to "min"`);
         bestCount = 10;
-        mode = "min"; //reset mode to avoid confusion later
+        mode = "min"; //reset mode to avoid stops
     }
 
     for(let r=0; r<9; r++)  {
@@ -80,6 +105,7 @@ function bestCell(brd, mode)  {
  * @param {int} row - current row
  * @param {int} col - current column
  * @returns boolean - true if board was filled, false if not
+ * @note assumes board is valid at start, if not it will get stuck in infinite recursion
  */
 function fillRandomBoard(brd, row = 0, col = 0) {
     if(row==9)  { return true;  }  //base case
@@ -99,22 +125,6 @@ function fillRandomBoard(brd, row = 0, col = 0) {
     return false;
 }
 
-function isValid(brd, row, col, num)  {
-    for(let c=0; c<9; c++)  {
-        if (brd[row][c] == num) return false;
-    }
-    for(let r=0; r<9; r++)  {
-        if (brd[r][col] == num) return false;
-    }
-    const boxRow = ~~(row/3)*3;
-    const boxCol = ~~(col/3)*3;
-    for(let r=0; r<3; r++) {
-        for(let c=0; c<3; c++) {
-            if (brd[boxRow + r][boxCol + c] == num) return false;
-        }
-    }
-    return true;
-}
 function countSolutions(brd) {
     let { r, c, candidates } = bestCell(brd, "min");
     if (r === null) { return 1; }
