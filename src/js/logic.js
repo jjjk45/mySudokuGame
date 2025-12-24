@@ -159,8 +159,9 @@ function countSolutions(brd) {
  * @param {"easy" | "medium" | "hard" | "veryHard"} diff
  * @returns {int[][]} a new board array with the empty spaces added
  */
-function addEmptySpaces(brd, diff)  {
-    const newBoard = brd.map(row => row.slice());
+function addEmptySpaces(gameState)  {
+    let newState = {...gameState};
+    const newBoard = newState.board.map(row => row.slice());
     const positions = [];
     for(let r=0; r<9; r++)  {
         for(let c=0; c<9; c++)  {
@@ -168,25 +169,24 @@ function addEmptySpaces(brd, diff)  {
         }
     }
     shuffle(positions);
-    emptySpaces = 0
     const difficultyValues = {
         easy: 45,
         medium: 37,
         hard: 29,
         veryHard: 17 //never seen it generate below 21 but i bet its possible
     }
-    let tilesToKeep = 81 - difficultyValues[diff];
-    while(emptySpaces<tilesToKeep && positions.length>0)  {
+    while(newState.emptySpaces<difficultyValues[newState.difficulty] && positions.length>0)  {
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
         if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
-            emptySpaces++;
+            newState.emptySpaces++;
         } else  {
-            newBoard[row][col] = board[row][col];
+            newBoard[row][col] = newState.board[row][col];
         }
     }
-    return newBoard;
+    newState.board = newBoard;
+    return newState;
 }
 
 export {
@@ -196,5 +196,6 @@ export {
     generateBoard,
     fillRandomBoard, //remove in prod, export is only for tests
     isValid,
-    countSolutions
+    countSolutions,
+    addEmptySpaces
 };

@@ -11,7 +11,7 @@ function makeSelectableNumbers()    {
         let number = document.createElement("div");
         number.id = i;
         number.innerText = i;
-        number.addEventListener("click", selectNumber);
+        //number.addEventListener("click", selectNumber);
         number.classList.add("number");
         document.getElementById("digits").appendChild(number);
     }
@@ -34,7 +34,7 @@ function createBoardElements(board)  {
             if(c==2 || c==5)    {
                 tile.classList.add("vertical-line");
             }
-            tile.addEventListener("click", selectTile);
+            //tile.addEventListener("click", selectTile);
             tile.classList.add("tile");
             document.getElementById("board").appendChild(tile);
         }

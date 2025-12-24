@@ -15,7 +15,9 @@ let sd = "easy"; //selected difficulty
 function initializeGame(sd) {
     gameState = logic.createGame(sd);
     gameState.solution = logic.generateBoard(); //in the future handle this server side
-    gameState.board = logic.addEmptySpaces(gameState.solution);
+    console.log(gameState.solution);
+    gameState.board = logic.addEmptySpaces(gameState);
+    console.log(gameState.board);
 }
 function resetGame(sd)  {
     initializeGame(sd);
@@ -31,5 +33,4 @@ window.onload = function() {
     ui.makeSelectableNumbers();
     ui.createBoardElements(gameState.board);
     document.getElementById("easy").classList.add("easy-clicked");
-    setGame();
 }
