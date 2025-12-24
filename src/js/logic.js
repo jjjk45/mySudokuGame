@@ -1,4 +1,8 @@
-function createGame() {
+/**
+ * @param {"easy" | "medium" | "hard" | "veryHard"} difficulty
+ * @returns a gamestate object
+ */
+function createGame(difficulty) {
     return {
         board: null,
         solution: null,
@@ -6,41 +10,39 @@ function createGame() {
         errors: 0,
         solving: false,
         cancelSolve: false,
-        difficulty: "easy",
+        difficulty: difficulty,
         emptySpaces: 0
     };
 }
-
 /**
- * @param {int[][]} arr - array to shuffle
+ * @param {int[]} arr - array to shuffle
  * @returns void - shuffles the array in place
  */
 function shuffle(arr)  {
     for(let i = arr.length - 1; i > 0; i--) {
-        let j = ~~(Math.random() * (i + 1)); //faster way to truncate/floor in js, I might remove
+        let j = Math.floor(Math.random() * (i + 1));
         let temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 }
-
 /**
  * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
  * @param {int} row - row index (0-8)
  * @param {int} col - column index (0-8)
  * @param {int} num - number to check (1-9)
  * @returns boolean - true if num can be placed at brd[row][col] without violating Sudoku rules
- * @note can return true for numbers >9 or <1 if they are not present in the row, column, or box
  */
 function isValid(brd, row, col, num)  {
+    if(num < 1 || num > 9)  { return false; }
     for(let c=0; c<9; c++)  {
         if(brd[row][c] == num) { return false; }
     }
     for(let r=0; r<9; r++)  {
         if(brd[r][col] == num) { return false; }
     }
-    const boxRow = ~~(row/3)*3;
-    const boxCol = ~~(col/3)*3;
+    const boxRow = Math.floor(row/3)*3;
+    const boxCol = Math.floor(col/3)*3;
     for(let r=0; r<3; r++) {
         for(let c=0; c<3; c++) {
             if(brd[boxRow + r][boxCol + c] == num) { return false; }
@@ -48,7 +50,6 @@ function isValid(brd, row, col, num)  {
     }
     return true;
 }
-
 /**
  * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
  * @param {"min" | "max"} mode - Heuristic:  "min" = cell with fewest possible candidates, "max" = cell with most possible candidates
@@ -99,11 +100,17 @@ function bestCell(brd, mode)  {
     }
     return best;
 }
-
 /**
- * @param {int[][]} brd - the board matrix you pass in
- * @param {int} row - current row
- * @param {int} col - current column
+ * @note only creates 9x9 boards, this is hardcoded in almost everything in this program I should fix
+ * @returns returns randomly filled board
+ */
+function generateBoard()    {
+    const board = Array(9).fill().map(() => Array(9).fill(0));
+    fillRandomBoard(board);
+    return board;
+}
+/**
+ * recursively fills a random sudoku board, is called upon by generateBoard()
  * @returns boolean - true if board was filled, false if not
  * @note assumes board is valid at start, if not it will get stuck in infinite recursion
  */
@@ -124,7 +131,12 @@ function fillRandomBoard(brd, row = 0, col = 0) {
     }
     return false;
 }
-
+/**
+ * counts the number of valid solutions for a Sudoku board
+ * @param {number[][]} brd
+ * @returns {int}
+ * @note temporarily mutates the board but restores it before returning
+ */
 function countSolutions(brd) {
     let { r, c, candidates } = bestCell(brd, "min");
     if (r === null) { return 1; }
@@ -141,12 +153,48 @@ function countSolutions(brd) {
     }
     return total;
 }
+/**
+ * adds empty spaces/masks to a full board based on the difficulty
+ * @param {int[][]} brd
+ * @param {"easy" | "medium" | "hard" | "veryHard"} diff
+ * @returns {int[][]} a new board array with the empty spaces added
+ */
+function addEmptySpaces(brd, diff)  {
+    const newBoard = brd.map(row => row.slice());
+    const positions = [];
+    for(let r=0; r<9; r++)  {
+        for(let c=0; c<9; c++)  {
+            positions.push({r,c});
+        }
+    }
+    shuffle(positions);
+    emptySpaces = 0
+    const difficultyValues = {
+        easy: 45,
+        medium: 37,
+        hard: 29,
+        veryHard: 17 //never seen it generate below 21 but i bet its possible
+    }
+    let tilesToKeep = 81 - difficultyValues[diff];
+    while(emptySpaces<tilesToKeep && positions.length>0)  {
+        let pos = positions.pop();
+        let row = pos.r, col = pos.c;
+        newBoard[row][col] = 0;
+        if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
+            emptySpaces++;
+        } else  {
+            newBoard[row][col] = board[row][col];
+        }
+    }
+    return newBoard;
+}
 
 export {
     createGame,
     shuffle,
     bestCell,
-    fillRandomBoard,
+    generateBoard,
+    fillRandomBoard, //remove in prod, export is only for tests
     isValid,
     countSolutions
 };
