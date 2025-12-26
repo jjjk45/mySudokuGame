@@ -159,9 +159,8 @@ function countSolutions(brd) {
  * @param {"easy" | "medium" | "hard" | "veryHard"} diff
  * @returns {int[][]} a new board array with the empty spaces added
  */
-function addEmptySpaces(gameState)  {
-    let newState = {...gameState};
-    const newBoard = newState.board.map(row => row.slice());
+function addEmptySpaces(brd, diff)  {
+    const newBoard = brd.map(row => row.slice());
     const positions = [];
     for(let r=0; r<9; r++)  {
         for(let c=0; c<9; c++)  {
@@ -175,20 +174,35 @@ function addEmptySpaces(gameState)  {
         hard: 29,
         veryHard: 17 //never seen it generate below 21 but i bet its possible
     }
-    while(newState.emptySpaces<difficultyValues[newState.difficulty] && positions.length>0)  {
+    let removed = 0;
+    while(removed<difficultyValues[diff] && positions.length>0)  {
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;
         if(countSolutions(newBoard.map(row => row.slice())) == 1)    {
-            newState.emptySpaces++;
+            removed++;
         } else  {
-            newBoard[row][col] = newState.board[row][col];
+            newBoard[row][col] = brd[row][col]; //using gameState.solution because that is how it is written in main.js
         }
     }
-    newState.board = newBoard;
-    return newState;
+    return newBoard;
 }
-
+/**
+ * counts empty spaces in a sudoku board (indicated by zeroes)
+ * @param {int[][]} brd
+ * @returns {int} count of empty spaces
+ */
+function countEmptySpaces(brd)  {
+    let count = 0;
+    for(let r=0; r<9; r++)  {
+        for(let c=0; c<9; c++)  {
+            if(brd[r][c]===0)   {
+                count++;
+            }
+        }
+    }
+    return count;
+}
 export {
     createGame,
     shuffle,
@@ -197,5 +211,6 @@ export {
     fillRandomBoard, //remove in prod, export is only for tests
     isValid,
     countSolutions,
-    addEmptySpaces
+    addEmptySpaces,
+    countEmptySpaces
 };

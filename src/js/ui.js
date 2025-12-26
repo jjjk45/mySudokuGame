@@ -1,24 +1,37 @@
 export {
-    makeSelectableNumbers,
-    setErrorCount,
-    createBoardElements,
+    registerHandlers,
     resetBoardElements,
+    createBoardElements,
+    makeSelectableNumbers,
+    addButtonFunctionality,
+    setErrorCount,
     clearTiles
 };
+
+let onNumSelected;
+let onTileSelected;
+let onButtonSelected;
+function registerHandlers(handlers)   {
+    onNumSelected = handlers.onNumSelected;
+    onTileSelected = handlers.onTileSelected;
+    onButtonSelected = handlers.onButtonSelected;
+}
 
 function makeSelectableNumbers()    {
     for (let i=1; i<=9; i++) {
         let number = document.createElement("div");
         number.id = i;
         number.innerText = i;
-        //number.addEventListener("click", selectNumber);
+        number.addEventListener("click", () => {
+            if(onNumSelected)   {
+                onNumSelected(i);
+            }
+        });
         number.classList.add("number");
         document.getElementById("digits").appendChild(number);
     }
 }
-function setErrorCount(num)  {
-    document.getElementById("errors").innerText = num;
-}
+
 function createBoardElements(board)  {
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
@@ -34,7 +47,11 @@ function createBoardElements(board)  {
             if(c==2 || c==5)    {
                 tile.classList.add("vertical-line");
             }
-            //tile.addEventListener("click", selectTile);
+            tile.addEventListener("click", () => {
+                if(onTileSelected)   {
+                    onTileSelected(r,c);
+                }
+            });
             tile.classList.add("tile");
             document.getElementById("board").appendChild(tile);
         }
@@ -55,7 +72,20 @@ function resetBoardElements(board)   {
         }
     }
 }
+function addButtonFunctionality() {
+    ["reset","easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(button => {
+        document.getElementById(button).addEventListener("click", () => {
+            if(onButtonSelected)    {
+                onButtonSelected(button);
+            }
+        });
+    });
+}
+
 function clearTiles() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
+}
+function setErrorCount(num)  {
+    document.getElementById("errors").innerText = num;
 }
