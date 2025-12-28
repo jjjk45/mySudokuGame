@@ -22,7 +22,6 @@ h1 {
 #board  {
     height: 450px;
     width: 450px;
-
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(9, 1fr);
@@ -38,6 +37,11 @@ h1 {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+#tile:active    {
+    background: lightgray;
+    color: white;
+    font-weight: bold;
 }
 #digits {
     height: 50px;
@@ -60,6 +64,11 @@ h1 {
     align-items: center;
     cursor: pointer;
 }
+#number:active  {
+    background: gray;
+    color: white;
+    font-weight: bold;
+}
 
 .number-selected    {
     background-color:  gray;
@@ -68,6 +77,9 @@ h1 {
 .tile-start {
     background-color: whitesmoke;
     cursor: default;
+}
+.tile-selected  {
+    background-color: lightgray;
 }
 
 .horizontal-line    {

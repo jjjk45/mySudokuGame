@@ -5,12 +5,16 @@ export {
     makeSelectableNumbers,
     addButtonFunctionality,
     setErrorCount,
-    clearTiles
+    clearTiles,
+    highlightNumber,
+    highlightTile,
+    updateTile
 };
 
 let onNumSelected;
 let onTileSelected;
 let onButtonSelected;
+
 function registerHandlers(handlers)   {
     onNumSelected = handlers.onNumSelected;
     onTileSelected = handlers.onTileSelected;
@@ -81,6 +85,26 @@ function addButtonFunctionality() {
         });
     });
 }
+/**
+ * @param {int} num
+ * @param {"add"|"remove"} operation
+ */
+function highlightNumber(num, operation)   {
+    let numSelected = document.getElementById(num.toString());
+    if(operation === "add") { numSelected.classList.add("number-selected"); }
+    else if(operation === "remove") { numSelected.classList.remove("number-selected"); }
+    return;
+}
+function highlightTile(r, c, operation) {
+    let tileSelected = document.getElementById(`${r}-${c}`);
+    if(operation === "add") { tileSelected.classList.add("tile-selected"); }
+    if(operation === "remove") { tileSelected.classList.remove("tile-selected"); }
+    return;
+}
+function updateTile(r, c, num)  {
+    document.getElementById(`${r}-${c}`).innerText = num;
+}
+
 
 function clearTiles() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));

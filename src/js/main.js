@@ -2,25 +2,76 @@ import * as logic from "./logic.js";
 import * as ui from "./ui.js";
 let gameState;
 let sd = "easy"; //selected difficulty
+let ls = null; //last selected (either tile or number)
 
-/*
-        board: null,
-        solution: null,
-        hintsLeft: 3,
-        errors: 0,
-        solving: false,
-        cancelSolve: false,
-        difficulty: difficulty,
-        emptySpaces: 0
-*/
 function handleNumSelected(num)    {
     console.log(`Number Selected: ${num}`);
+    lastSelectedHelper({num:num, r:null, c:null});
 }
 function handleTileSelected(r,c)    {
     console.log(`Tile Selected: ${r}-${c}`);
+    lastSelectedHelper({num:null, r:r, c:c});
 }
 function handleButtonSelected(str)  {
     console.log(`Button Selected: ${str}`);
+}
+
+/**
+ * @param {{num: int|null, r: int|null, c: int|null}} obj
+ */
+function lastSelectedHelper(obj)  {
+    console.log(ls);
+    if(!ls)  {
+        ls = obj;
+        if(obj.num) { ui.highlightNumber(obj.num, "add"); }
+        else {ui.highlightTile(obj.r, obj.c, "add"); }
+        return;
+    }
+    if(logic.sameNumberAndTileObject(ls, obj))   {
+        ls = null;
+        if(obj.num) { ui.highlightNumber(obj.num, "remove"); }
+        else { ui.highlightTile(obj.r, obj.c, "remove"); }
+        return;
+    }
+    if(logic.bothNumberOrBothTileObject(ls, obj))    {
+        if(obj.num) {
+            ui.highlightNumber(ls.num, "remove");
+            ui.highlightNumber(obj.num, "add");
+        }
+        else {
+            ui.highlightTile(ls.r, ls.c, "remove");
+            ui.highlightTile(obj.r, obj.c, "add");
+        }
+        ls = obj;
+        return;
+    }
+    if(ls.num && !obj.num)  {   //last selected is a number, the object is a tile
+        if(logic.makeMove(gameState, obj.r, obj.c, ls.num)) {
+            gameState.board[obj.r][obj.c] = ls.num;
+            ui.updateTile(obj.r, obj.c, ls.num);
+        }
+        else {
+            gameState.errors += 1;
+            ui.setErrorCount(gameState.errors);
+        }
+        ui.highlightNumber(ls.num, "remove");
+        ui.highlightTile(obj.r, obj.c, "remove");
+        ls = null;
+    }
+    else { //last selected is a tile, the object is a number
+        logic.makeMove(gameState, ls.r, ls.c, obj.num);
+        if(logic.makeMove(gameState, ls.r, ls.c, obj.num)) {
+            gameState.board[ls.r][ls.c] = obj.num;
+            ui.updateTile(ls.r, ls.c, obj.num);
+        }
+        else {
+            gameState.errors += 1;
+            ui.setErrorCount(gameState.errors);
+        }
+        ui.highlightNumber(obj.num, "remove");
+        ui.highlightTile(ls.r, ls.c, "remove");
+        ls = null;
+    }
 }
 
 function initializeGame(sd) {
