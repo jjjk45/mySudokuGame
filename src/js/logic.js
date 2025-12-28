@@ -26,18 +26,7 @@ function shuffle(arr)  {
         arr[j] = temp;
     }
 }
-/**
- * finds out if two objects are the same for use in the lastSelectedHelper function in main.js
- * @param {{num: int|null, r: int|null, c: int|null}} obj1
- * @param {{num: int|null, r: int|null, c: int|null}} obj2
- * @returns {true|false}
- */
-function sameNumberAndTileObject(obj1, obj2) {
-    return( obj1.num == obj2.num && obj1.r == obj2.r && obj1.c == obj2.c );
-}
-function bothNumberOrBothTileObject(obj1, obj2) { //bad names lol what should i put this as
-    return((obj1.num && obj2.num) || (!obj1.num && !obj2.num)); //second part is bs i should change
-}
+
 /**
  * @param {int[][]} brd - 9x9 Sudoku board (0 = empty, 1-9 = filled)
  * @param {int} row - row index (0-8)
@@ -222,12 +211,10 @@ function countEmptySpaces(brd)  {
  * @param {int} num
  * @returns {boolean}
  */
-function makeMove(gameState, r, c, num) {
-    if(gameState.solution[r][c] === num)    {
-        gameState.board[r][c] = num;
-        return true;
-    }
-    return false;
+function checkMove(gameState, r, c, num) {
+    if(gameState.board[r][c] != 0)  { return false; }
+    if(gameState.solution[r][c] != num) {return false; }
+    return true;
 }
 export {
     createGame,
@@ -239,7 +226,5 @@ export {
     countSolutions,
     addEmptySpaces,
     countEmptySpaces,
-    sameNumberAndTileObject,
-    bothNumberOrBothTileObject,
-    makeMove
+    checkMove
 };

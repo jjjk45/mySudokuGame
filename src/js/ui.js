@@ -85,6 +85,7 @@ function addButtonFunctionality() {
         });
     });
 }
+
 /**
  * @param {int} num
  * @param {"add"|"remove"} operation
@@ -101,11 +102,10 @@ function highlightTile(r, c, operation) {
     if(operation === "remove") { tileSelected.classList.remove("tile-selected"); }
     return;
 }
+
 function updateTile(r, c, num)  {
     document.getElementById(`${r}-${c}`).innerText = num;
 }
-
-
 function clearTiles() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));

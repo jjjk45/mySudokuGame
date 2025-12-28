@@ -6,72 +6,70 @@ let ls = null; //last selected (either tile or number)
 
 function handleNumSelected(num)    {
     console.log(`Number Selected: ${num}`);
-    lastSelectedHelper({num:num, r:null, c:null});
+    handleSelection({type: "number", num: num});
 }
 function handleTileSelected(r,c)    {
     console.log(`Tile Selected: ${r}-${c}`);
-    lastSelectedHelper({num:null, r:r, c:c});
+    handleSelection({type: "tile", r: r, c: c});
 }
 function handleButtonSelected(str)  {
     console.log(`Button Selected: ${str}`);
 }
 
 /**
- * @param {{num: int|null, r: int|null, c: int|null}} obj
+ * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} obj
  */
-function lastSelectedHelper(obj)  {
-    console.log(ls);
-    if(!ls)  {
-        ls = obj;
-        if(obj.num) { ui.highlightNumber(obj.num, "add"); }
-        else {ui.highlightTile(obj.r, obj.c, "add"); }
-        return;
-    }
-    if(logic.sameNumberAndTileObject(ls, obj))   {
-        ls = null;
-        if(obj.num) { ui.highlightNumber(obj.num, "remove"); }
-        else { ui.highlightTile(obj.r, obj.c, "remove"); }
-        return;
-    }
-    if(logic.bothNumberOrBothTileObject(ls, obj))    {
-        if(obj.num) {
-            ui.highlightNumber(ls.num, "remove");
-            ui.highlightNumber(obj.num, "add");
-        }
-        else {
-            ui.highlightTile(ls.r, ls.c, "remove");
-            ui.highlightTile(obj.r, obj.c, "add");
-        }
+function handleSelection(obj)   {
+    if(!ls) {
+        select(obj);
         ls = obj;
         return;
     }
-    if(ls.num && !obj.num)  {   //last selected is a number, the object is a tile
-        if(logic.makeMove(gameState, obj.r, obj.c, ls.num)) {
-            gameState.board[obj.r][obj.c] = ls.num;
-            ui.updateTile(obj.r, obj.c, ls.num);
-        }
-        else {
-            gameState.errors += 1;
-            ui.setErrorCount(gameState.errors);
-        }
-        ui.highlightNumber(ls.num, "remove");
-        ui.highlightTile(obj.r, obj.c, "remove");
+    if(isSameSelection(ls,obj)) {
+        deselect(obj);
         ls = null;
+        return;
     }
-    else { //last selected is a tile, the object is a number
-        logic.makeMove(gameState, ls.r, ls.c, obj.num);
-        if(logic.makeMove(gameState, ls.r, ls.c, obj.num)) {
-            gameState.board[ls.r][ls.c] = obj.num;
-            ui.updateTile(ls.r, ls.c, obj.num);
-        }
-        else {
-            gameState.errors += 1;
-            ui.setErrorCount(gameState.errors);
-        }
-        ui.highlightNumber(obj.num, "remove");
-        ui.highlightTile(ls.r, ls.c, "remove");
-        ls = null;
+    if(ls.type === obj.type)    {
+        deselect(ls);
+        select(obj);
+        ls = obj;
+        return;
     }
+    applyMoveOrUpdateErrors(ls, obj);
+    deselect(ls);
+    ls = null;
+}
+//helpers
+function select(obj)    {
+    if(obj.type === "tile") { ui.highlightTile(obj.r, obj.c, "add"); }
+    else if(obj.type === "number")  { ui.highlightNumber(obj.num, "add"); }
+}
+function deselect(obj)  {
+    if(obj.type === "tile") { ui.highlightTile(obj.r, obj.c, "remove"); }
+    else if(obj.type === "number")  { ui.highlightNumber(obj.num, "remove"); }
+}
+function isSameSelection(obj1, obj2)  {
+    if(obj1.type === "tile" && obj2.type === "tile")    { return( obj1.r == obj2.r && obj1.c == obj2.c ); }
+    if(obj1.type === "number" && obj2.type === "number")    { return( obj1.num == obj2.num ); }
+}
+function applyMoveOrUpdateErrors(obj1, obj2)    { //I feel like this might be doing too much but i really dont know how to cut it down since i need the false from checkmove to know for errors
+    if(obj1.type === "number" && obj2.type === "tile")  {
+        if(logic.checkMove(gameState, obj2.r, obj2.c, obj1.num))    {
+            gameState.board[obj2.r][obj2.c] = obj1.num;
+            ui.updateTile(obj2.r, obj2.c, obj1.num);
+            return;
+        }
+    }
+    if(obj1.type === "tile" && obj2.type === "number")  {
+        if(logic.checkMove(gameState, obj1.r, obj1.c, obj2.num))    {
+            gameState.board[obj1.r][obj1.c] = obj2.num;
+            ui.updateTile(obj1.r, obj1.c, obj2.num);
+            return;
+        }
+    }
+    gameState.errors += 1;
+    ui.setErrorCount(gameState.errors);
 }
 
 function initializeGame(sd) {

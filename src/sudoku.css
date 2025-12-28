@@ -29,20 +29,29 @@ h1 {
 }
 .tile   {
     border: 1px solid lightgray;
-
-    /* text */
     font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    user-select: none;
 }
-#tile:active    {
-    background: lightgray;
-    color: white;
+.tile:active    {
+    background: gray;
     font-weight: bold;
+    font-size: 21px;
+    border: 1px solid black;
 }
+.tile-start {
+    background-color: whitesmoke;
+    cursor: default;
+}
+.tile-selected  {
+    background-color: gray;
+    border: 1px solid black;
+}
+
 #digits {
     height: 50px;
     width: 450px;
@@ -55,31 +64,22 @@ h1 {
 
 .number {
     border: 1px solid black;
-
-    /* text */
     font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    user-select: none;
 }
-#number:active  {
+.number:active  {
     background: gray;
-    color: white;
     font-weight: bold;
+    font-size: 21px;
 }
 
 .number-selected    {
     background-color:  gray;
-}
-
-.tile-start {
-    background-color: whitesmoke;
-    cursor: default;
-}
-.tile-selected  {
-    background-color: lightgray;
 }
 
 .horizontal-line    {
@@ -267,5 +267,3 @@ h1 {
         font-size: 11px;
     }
 }
-
-
