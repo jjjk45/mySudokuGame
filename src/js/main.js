@@ -12,11 +12,27 @@ function handleTileSelected(r,c)    {
     console.log(`Tile Selected: ${r}-${c}`);
     handleSelection({type: "tile", r: r, c: c});
 }
-function handleButtonSelected(str)  {
-    console.log(`Button Selected: ${str}`);
+function handleButtonSelected(btn)  {
+    console.log(`Button Selected: ${btn}`);
+    switch(btn) {
+        case "reset":
+            resetGame();
+            break;
+        case "easy":
+        case "medium":
+        case "hard":
+        case "veryHard":
+            ui.highlightButton(btn, "add");
+            ui.highlightButton(gameState.difficulty, "remove");
+            sd = btn;
+            resetGame();
+            break;
+        default:
+            throw new Error(`Invalid button: ${btn}`);
+    }
 }
 
-/**
+/** function that is called when the sudoku tiles or numbers are clicked
  * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} obj
  */
 function handleSelection(obj)   {
@@ -25,7 +41,7 @@ function handleSelection(obj)   {
         ls = obj;
         return;
     }
-    if(isSameSelection(ls,obj)) {
+    if(isSameSelection(ls, obj)) {
         deselect(obj);
         ls = null;
         return;
@@ -36,11 +52,14 @@ function handleSelection(obj)   {
         ls = obj;
         return;
     }
-    applyMoveOrUpdateErrors(ls, obj);
-    deselect(ls);
-    ls = null;
+    if(applyMoveOrUpdateErrors(ls, obj) && ls.type !== "tile")  {
+        deselect(ls);
+        ls = null;
+    }
 }
-//helpers
+/** helper functions for handleSelection()
+ * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} obj
+ */
 function select(obj)    {
     if(obj.type === "tile") { ui.highlightTile(obj.r, obj.c, "add"); }
     else if(obj.type === "number")  { ui.highlightNumber(obj.num, "add"); }
@@ -54,44 +73,41 @@ function isSameSelection(obj1, obj2)  {
     if(obj1.type === "number" && obj2.type === "number")    { return( obj1.num == obj2.num ); }
 }
 function applyMoveOrUpdateErrors(obj1, obj2)    { //I feel like this might be doing too much but i really dont know how to cut it down since i need the false from checkmove to know for errors
-    if(obj1.type === "number" && obj2.type === "tile")  {
-        if(logic.checkMove(gameState, obj2.r, obj2.c, obj1.num))    {
-            gameState.board[obj2.r][obj2.c] = obj1.num;
-            ui.updateTile(obj2.r, obj2.c, obj1.num);
-            return;
-        }
-    }
-    if(obj1.type === "tile" && obj2.type === "number")  {
-        if(logic.checkMove(gameState, obj1.r, obj1.c, obj2.num))    {
-            gameState.board[obj1.r][obj1.c] = obj2.num;
-            ui.updateTile(obj1.r, obj1.c, obj2.num);
-            return;
-        }
+    let tile = obj1.type === "tile" ? obj1 : obj2;
+    let number = obj1.type === "number" ? obj1 : obj2;
+    if(gameState.board[tile.r][tile.c] != 0)    { return; }
+    if(logic.checkMove(gameState, tile.r, tile.c, number.num))    {
+        gameState.board[tile.r][tile.c] = number.num;
+        ui.updateTile(tile.r, tile.c, number.num);
+        return;
     }
     gameState.errors += 1;
     ui.setErrorCount(gameState.errors);
 }
-
 function initializeGame(sd) {
     gameState = logic.createGame(sd);
-    gameState.solution = logic.generateBoard(); //in the future handle this server side
+    gameState.solution = logic.generateBoard(); //in the future handle this server side maybe?
     console.log(gameState.solution);
     gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
     gameState.emptySpaces = logic.countEmptySpaces(gameState.board);
     console.log(gameState.board);
 }
-function resetGame(sd)  {
+function resetGame()  {
     initializeGame(sd);
     gameState.errors = 0;
     gameState.hintsLeft = 3;
+    if(ls)  {
+        deselect(ls);
+        ls = null;
+    }
     ui.setErrorCount(gameState.errors);
     ui.resetBoardElements(gameState.board);
     ui.clearTiles();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
 }
 window.onload = function() {
-    initializeGame(sd);
-    ui.registerHandlers({
+    initializeGame("easy");
+    ui.registerHandlers({ //should i name this object?
         onNumSelected: handleNumSelected,
         onTileSelected: handleTileSelected,
         onButtonSelected: handleButtonSelected
@@ -99,5 +115,5 @@ window.onload = function() {
     ui.makeSelectableNumbers();
     ui.createBoardElements(gameState.board);
     ui.addButtonFunctionality();
-    document.getElementById("easy").classList.add("easy-clicked"); //maybe remove or add to ui.js
+    ui.highlightButton("easy", "add");
 }

@@ -176,7 +176,7 @@ function addEmptySpaces(brd, diff)  {
         veryHard: 17 //never seen it generate below 21 but i bet its possible
     }
     let removed = 0;
-    while(removed<difficultyValues[diff] && positions.length>0)  {
+    while(removed<(81-difficultyValues[diff]) && positions.length>0)  {
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
         newBoard[row][col] = 0;

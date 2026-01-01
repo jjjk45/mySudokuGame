@@ -8,7 +8,8 @@ export {
     clearTiles,
     highlightNumber,
     highlightTile,
-    updateTile
+    updateTile,
+    highlightButton
 };
 
 let onNumSelected;
@@ -112,4 +113,10 @@ function clearTiles() {
 }
 function setErrorCount(num)  {
     document.getElementById("errors").innerText = num;
+}
+function highlightButton(button, operation)   {
+    let buttonSelected = document.getElementById(button);
+    if(operation === "add") { buttonSelected.classList.add(`${button}-clicked`); }
+    else if(operation === "remove") { buttonSelected.classList.remove(`${button}-clicked`); }
+    return;
 }
