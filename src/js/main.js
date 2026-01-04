@@ -18,6 +18,12 @@ function handleButtonSelected(btn)  {
         case "reset":
             resetGame();
             break;
+        case "hint":    {
+            const obj = logic.bestCell(gameState.board, "min");
+            ui.highlightTile(obj.r, obj.c, "addHint");
+            ui.createHintPopupElement(obj.candidates);
+            break;
+        }
         case "easy":
         case "medium":
         case "hard":
@@ -25,7 +31,7 @@ function handleButtonSelected(btn)  {
             ui.highlightButton(btn, "add");
             ui.highlightButton(gameState.difficulty, "remove");
             sd = btn;
-            resetGame();
+            resetGame();    //i might update this logic to only reset when reset is pressed explicitly
             break;
         default:
             throw new Error(`Invalid button: ${btn}`);

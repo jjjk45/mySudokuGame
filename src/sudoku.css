@@ -90,6 +90,31 @@ h1 {
     border-right: 1px solid black !important;
 }
 
+.hint-popup {
+    position: absolute;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+}
+
+.hint-popup::after {
+    content: "";
+    position: absolute;
+
+    left: 0;
+    top: 50%;
+    transform: translate(-100%, -50%);
+
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+
+
+
 #reset  {
     width: 140px;
     position: fixed;

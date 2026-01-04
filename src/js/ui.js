@@ -1,5 +1,6 @@
 export {
     registerHandlers,
+    createHintPopupElement,
     resetBoardElements,
     createBoardElements,
     makeSelectableNumbers,
@@ -21,6 +22,26 @@ function registerHandlers(handlers)   {
     onTileSelected = handlers.onTileSelected;
     onButtonSelected = handlers.onButtonSelected;
 }
+
+function createHintPopupElement(nums) {
+    const hint = document.getElementById("hint");
+    const rect = hint.getBoundingClientRect();
+
+    const popup = document.createElement("div");
+    popup.id = "hint-popup";
+    popup.classList.add("hint-popup");
+
+    popup.style.left = `${rect.right + window.scrollX + 8}px`;
+
+    popup.style.top = `${rect.top + window.scrollY + rect.height / 2}px`;
+    popup.style.transform = "translateY(-50%)";
+
+    popup.textContent = `Can only be ${nums}`;
+
+    popup.addEventListener("click", () => popup.remove());
+    document.body.appendChild(popup);
+}
+
 
 function makeSelectableNumbers()    {
     for (let i=1; i<=9; i++) {
@@ -101,6 +122,7 @@ function highlightTile(r, c, operation) {
     let tileSelected = document.getElementById(`${r}-${c}`);
     if(operation === "add") { tileSelected.classList.add("tile-selected"); }
     if(operation === "remove") { tileSelected.classList.remove("tile-selected"); }
+    if(operation === "addHint") { tileSelected.classList.add("tile-hint"); }
     return;
 }
 
