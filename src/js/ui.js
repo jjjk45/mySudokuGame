@@ -1,12 +1,13 @@
 export {
     registerHandlers,
     createHintPopupElement,
+    removeHintPopupElement,
     resetBoardElements,
     createBoardElements,
     makeSelectableNumbers,
     addButtonFunctionality,
     setErrorCount,
-    clearTiles,
+    clearHints,
     highlightNumber,
     highlightTile,
     updateTile,
@@ -23,23 +24,31 @@ function registerHandlers(handlers)   {
     onButtonSelected = handlers.onButtonSelected;
 }
 
-function createHintPopupElement(nums) {
+function createHintPopupElement(r, c, nums) {
+    if(document.getElementById("hint-popup"))   { return; }
     const hint = document.getElementById("hint");
     const rect = hint.getBoundingClientRect();
-
     const popup = document.createElement("div");
     popup.id = "hint-popup";
     popup.classList.add("hint-popup");
 
-    popup.style.left = `${rect.right + window.scrollX + 8}px`;
-
-    popup.style.top = `${rect.top + window.scrollY + rect.height / 2}px`;
-    popup.style.transform = "translateY(-50%)";
-
-    popup.textContent = `Can only be ${nums}`;
-
-    popup.addEventListener("click", () => popup.remove());
+    const isMobile = window.matchMedia("(max-width: 750px)").matches; //will change later
+    if (isMobile) {
+        popup.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
+        popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+        popup.style.transform = "translateX(-50%)";
+    } else {
+        popup.style.left = `${rect.right + window.scrollX + 8}px`;
+        popup.style.top = `${rect.top + window.scrollY + rect.height / 2}px`;
+        popup.style.transform = "translateY(-50%)";
+    }
+    popup.textContent = `Tile ${r}-${c} can only be ${nums}`;
     document.body.appendChild(popup);
+}
+function removeHintPopupElement()  {
+    if(document.getElementById("hint-popup"))   {
+        document.getElementById("hint-popup").remove();
+    }
 }
 
 
@@ -87,7 +96,6 @@ function resetBoardElements(board)   {
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
             let tile = document.getElementById(r.toString() + "-" + c.toString());
-
             if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
@@ -116,21 +124,26 @@ function highlightNumber(num, operation)   {
     let numSelected = document.getElementById(num.toString());
     if(operation === "add") { numSelected.classList.add("number-selected"); }
     else if(operation === "remove") { numSelected.classList.remove("number-selected"); }
-    return;
 }
 function highlightTile(r, c, operation) {
-    let tileSelected = document.getElementById(`${r}-${c}`);
-    if(operation === "add") { tileSelected.classList.add("tile-selected"); }
-    if(operation === "remove") { tileSelected.classList.remove("tile-selected"); }
-    if(operation === "addHint") { tileSelected.classList.add("tile-hint"); }
-    return;
+    const tileSelected = document.getElementById(`${r}-${c}`);
+    const actions = { //do this for more functions
+        add: () => tileSelected.classList.add("tile-selected"),
+        remove: () => tileSelected.classList.remove("tile-selected"),
+        addHint: () => tileSelected.classList.add("tile-hint"),
+        removeHint: () => tileSelected.classList.remove("tile-hint")
+    }
+    actions[operation]?.();
 }
 
 function updateTile(r, c, num)  {
     document.getElementById(`${r}-${c}`).innerText = num;
 }
-function clearTiles() {
+function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
+    removeHintPopupElement();
+}
+function clearSolve()   {
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
 }
 function setErrorCount(num)  {

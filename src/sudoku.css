@@ -96,6 +96,7 @@ h1 {
     background-color: #555;
     color: #fff;
     text-align: center;
+    font-size: 14px;
     border-radius: 6px;
     padding: 8px 0;
 }
@@ -225,6 +226,10 @@ h1 {
     background-color: lightskyblue;
     border: 1px solid blue;
 }
+.tile-hint.tile-selected    {
+    background-color: lavender;
+    border: 1px solid purple;
+}
 #solve   {
     width: 140px;
     position: fixed;
@@ -290,5 +295,11 @@ h1 {
         text-align: center;
         padding: 0 0 0 0;
         font-size: 11px;
+    }
+    .hint-popup::after {
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        border-color: transparent transparent #555 transparent;
     }
 }

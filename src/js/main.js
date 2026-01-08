@@ -21,7 +21,7 @@ function handleButtonSelected(btn)  {
         case "hint":    {
             const obj = logic.bestCell(gameState.board, "min");
             ui.highlightTile(obj.r, obj.c, "addHint");
-            ui.createHintPopupElement(obj.candidates);
+            ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //if debug mode is on make it so these do not have the plus ones
             break;
         }
         case "easy":
@@ -85,10 +85,13 @@ function applyMoveOrUpdateErrors(obj1, obj2)    { //I feel like this might be do
     if(logic.checkMove(gameState, tile.r, tile.c, number.num))    {
         gameState.board[tile.r][tile.c] = number.num;
         ui.updateTile(tile.r, tile.c, number.num);
-        return;
+        ui.highlightTile(tile.r, tile.c, "removeHint");
+        ui.removeHintPopupElement();
+        return true;
     }
     gameState.errors += 1;
     ui.setErrorCount(gameState.errors);
+    return false;
 }
 function initializeGame(sd) {
     gameState = logic.createGame(sd);
@@ -108,7 +111,7 @@ function resetGame()  {
     }
     ui.setErrorCount(gameState.errors);
     ui.resetBoardElements(gameState.board);
-    ui.clearTiles();
+    ui.clearHints();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
 }
 window.onload = function() {
