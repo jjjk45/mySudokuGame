@@ -34,10 +34,12 @@ function handleButtonSelected(btn)  {
         case "medium":
         case "hard":
         case "veryHard":
-            ui.highlightButton(btn, "add");
-            ui.highlightButton(gameState.difficulty, "remove");
-            selectedDifficulty = btn;
-            resetGame();    //i might update this logic to only reset when reset is pressed explicitly
+            if(gameState.difficulty !== btn)    {
+                ui.highlightButton(btn, "add");
+                ui.highlightButton(gameState.difficulty, "remove");
+                selectedDifficulty = btn;
+                resetGame();    //i might update this logic to only reset when reset is pressed explicitly
+            }
             break;
         default:
             throw new Error(`Invalid button: ${btn}`);
