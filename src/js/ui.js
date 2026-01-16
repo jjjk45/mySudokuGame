@@ -1,58 +1,16 @@
-export {
-    registerHandlers,
-    createHintPopupElement,
-    removeHintPopupElement,
-    resetBoardElements,
-    createBoardElements,
-    makeSelectableNumbers,
-    addButtonFunctionality,
-    setErrorCount,
-    clearHints,
-    highlightNumber,
-    highlightTile,
-    updateTile,
-    highlightButton
-};
+const tilesArr = Array(9).fill().map(() => Array(9).fill(0)); //to stop the costly getElementbyIds
+const digitsArr = Array(9).fill(0);
 
 let onNumSelected;
 let onTileSelected;
 let onButtonSelected;
-
-function registerHandlers(handlers)   {
+export function registerHandlers(handlers)   {
     onNumSelected = handlers.onNumSelected;
     onTileSelected = handlers.onTileSelected;
     onButtonSelected = handlers.onButtonSelected;
 }
 
-function createHintPopupElement(r, c, nums) {
-    if(document.getElementById("hint-popup"))   { return; }
-    const hint = document.getElementById("hint");
-    const rect = hint.getBoundingClientRect();
-    const popup = document.createElement("div");
-    popup.id = "hint-popup";
-    popup.classList.add("hint-popup");
-
-    const isMobile = window.matchMedia("(max-width: 750px)").matches; //will change later
-    if (isMobile) {
-        popup.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
-        popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
-        popup.style.transform = "translateX(-50%)";
-    } else {
-        popup.style.left = `${rect.right + window.scrollX + 8}px`;
-        popup.style.top = `${rect.top + window.scrollY + rect.height / 2}px`;
-        popup.style.transform = "translateY(-50%)";
-    }
-    popup.textContent = `Tile ${r}-${c} can only be ${nums}`;
-    document.body.appendChild(popup);
-}
-function removeHintPopupElement()  {
-    if(document.getElementById("hint-popup"))   {
-        document.getElementById("hint-popup").remove();
-    }
-}
-
-
-function makeSelectableNumbers()    {
+export function makeSelectableNumbers()    {
     for (let i=1; i<=9; i++) {
         let number = document.createElement("div");
         number.id = i;
@@ -63,15 +21,16 @@ function makeSelectableNumbers()    {
             }
         });
         number.classList.add("number");
+        digitsArr[i] = number;
         document.getElementById("digits").appendChild(number);
     }
 }
-
-function createBoardElements(board)  {
+export function createBoardElements(board)  {
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
             let tile = document.createElement("div");
             tile.id = r.toString() + "-" + c.toString();
+            tilesArr[r][c] = tile;
             if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
@@ -92,10 +51,11 @@ function createBoardElements(board)  {
         }
     }
 }
-function resetBoardElements(board)   {
+export function resetBoardElements(board)   {
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
             let tile = document.getElementById(r.toString() + "-" + c.toString());
+            tilesArr[r][c] = tile;
             if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
@@ -106,11 +66,11 @@ function resetBoardElements(board)   {
         }
     }
 }
-function addButtonFunctionality() {
-    ["reset","easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(button => {
-        document.getElementById(button).addEventListener("click", () => {
+export function addButtonFunctionality() {
+    ["reset","easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(buttonText => {
+        document.getElementById(buttonText).addEventListener("click", () => {
             if(onButtonSelected)    {
-                onButtonSelected(button);
+                onButtonSelected(buttonText);
             }
         });
     });
@@ -120,38 +80,81 @@ function addButtonFunctionality() {
  * @param {int} num
  * @param {"add"|"remove"} operation
  */
-function highlightNumber(num, operation)   {
-    let numSelected = document.getElementById(num.toString());
-    if(operation === "add") { numSelected.classList.add("number-selected"); }
-    else if(operation === "remove") { numSelected.classList.remove("number-selected"); }
-}
-function highlightTile(r, c, operation) {
-    const tileSelected = document.getElementById(`${r}-${c}`);
-    const actions = { //do this for more functions
-        add: () => tileSelected.classList.add("tile-selected"),
-        remove: () => tileSelected.classList.remove("tile-selected"),
-        addHint: () => tileSelected.classList.add("tile-hint"),
-        removeHint: () => tileSelected.classList.remove("tile-hint")
+export function highlightNumber(num, operation)   {
+    switch(operation)   {
+        case "add":
+            digitsArr[num].classList.add("number-selected");
+            break;
+        case "remove":
+            digitsArr[num].classList.remove("number-selected");
+            break;
     }
-    actions[operation]?.();
 }
 
-function updateTile(r, c, num)  {
-    document.getElementById(`${r}-${c}`).innerText = num;
+export function highlightTile(r, c, operation) {
+    const tileSelected = tilesArr[r][c];
+    switch(operation)   {
+        case "add":
+            tileSelected.classList.add("tile-selected");
+            break;
+        case "remove":
+            tileSelected.classList.remove("tile-selected");
+            break;
+        case "addHint":
+            tileSelected.classList.add("tile-hint");
+            break;
+        case "removeHint":
+            tileSelected.classList.remove("tile-hint");
+            break;
+    }
 }
-function clearHints() {
+export function updateTile(r, c, num)  {
+    tilesArr[r][c].innerText = num;
+}
+
+export function highlightButton(button, operation)   {
+    let buttonSelected = document.getElementById(button);
+    if(operation === "add") { buttonSelected.classList.add(`${button}-clicked`); }
+    else if(operation === "remove") { buttonSelected.classList.remove(`${button}-clicked`); }
+    return;
+}
+
+export function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
     removeHintPopupElement();
 }
 function clearSolve()   {
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
 }
-function setErrorCount(num)  {
+export function setErrorCount(num)  {
     document.getElementById("errors").innerText = num;
 }
-function highlightButton(button, operation)   {
-    let buttonSelected = document.getElementById(button);
-    if(operation === "add") { buttonSelected.classList.add(`${button}-clicked`); }
-    else if(operation === "remove") { buttonSelected.classList.remove(`${button}-clicked`); }
-    return;
+export function setHintCount(num)   {
+    document.getElementsByClassName("hint-badge")[0].innerText = num;
+}
+export function createHintPopupElement(r, c, nums) {
+    if(document.getElementById("hint-popup"))   { return; }
+    const hint = document.getElementById("hint");
+    const rect = hint.getBoundingClientRect();
+    const popup = document.createElement("div");
+    popup.id = "hint-popup";
+    popup.classList.add("hint-popup");
+
+    const isMobile = window.matchMedia("(max-width: 750px)").matches; //do I hoist this?
+    if (isMobile) {
+        popup.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
+        popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+        popup.style.transform = "translateX(-50%)";
+    } else {
+        popup.style.left = `${rect.right + window.scrollX + 8}px`;
+        popup.style.top = `${rect.top + window.scrollY + rect.height / 2}px`;
+        popup.style.transform = "translateY(-50%)";
+    }
+    popup.textContent = `Tile ${r}-${c} can only be ${nums}`;
+    document.body.appendChild(popup);
+}
+export function removeHintPopupElement()  {
+    if(document.getElementById("hint-popup"))   {
+        document.getElementById("hint-popup").remove();
+    }
 }

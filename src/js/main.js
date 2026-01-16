@@ -1,8 +1,9 @@
 import * as logic from "./logic.js";
 import * as ui from "./ui.js";
 let gameState;
-let sd = "easy"; //selected difficulty
-let ls = null; //last selected (either tile or number)
+let selectedDifficulty = "easy";
+let lastSelected = null; //last selected (either tile or number)
+let activeHint = false; //messy fix to hint button spam
 
 function handleNumSelected(num)    {
     console.log(`Number Selected: ${num}`);
@@ -20,8 +21,13 @@ function handleButtonSelected(btn)  {
             break;
         case "hint":    {
             const obj = logic.bestCell(gameState.board, "min");
-            ui.highlightTile(obj.r, obj.c, "addHint");
-            ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //if debug mode is on make it so these do not have the plus ones
+            if(!activeHint && gameState.hintsLeft > 0 && obj.candidates)  { //if bestCell failed it will return an object with candidates: [] which is falsy
+                activeHint = true;
+                ui.highlightTile(obj.r, obj.c, "addHint");
+                ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //if debug mode is on make it so these do not have the plus ones
+                gameState.hintsLeft -= 1;
+                ui.setHintCount(gameState.hintsLeft);
+            }
             break;
         }
         case "easy":
@@ -30,7 +36,7 @@ function handleButtonSelected(btn)  {
         case "veryHard":
             ui.highlightButton(btn, "add");
             ui.highlightButton(gameState.difficulty, "remove");
-            sd = btn;
+            selectedDifficulty = btn;
             resetGame();    //i might update this logic to only reset when reset is pressed explicitly
             break;
         default:
@@ -42,25 +48,25 @@ function handleButtonSelected(btn)  {
  * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} obj
  */
 function handleSelection(obj)   {
-    if(!ls) {
+    if(!lastSelected) {
         select(obj);
-        ls = obj;
+        lastSelected = obj;
         return;
     }
-    if(isSameSelection(ls, obj)) {
+    if(isSameSelection(lastSelected, obj)) {
         deselect(obj);
-        ls = null;
+        lastSelected = null;
         return;
     }
-    if(ls.type === obj.type)    {
-        deselect(ls);
+    if(lastSelected.type === obj.type)    {
+        deselect(lastSelected);
         select(obj);
-        ls = obj;
+        lastSelected = obj;
         return;
     }
-    if(applyMoveOrUpdateErrors(ls, obj) && ls.type !== "tile")  {
-        deselect(ls);
-        ls = null;
+    if(applyMoveOrUpdateErrors(lastSelected, obj) && lastSelected.type !== "tile")  {
+        deselect(lastSelected);
+        lastSelected = null;
     }
 }
 /** helper functions for handleSelection()
@@ -77,15 +83,17 @@ function deselect(obj)  {
 function isSameSelection(obj1, obj2)  {
     if(obj1.type === "tile" && obj2.type === "tile")    { return( obj1.r == obj2.r && obj1.c == obj2.c ); }
     if(obj1.type === "number" && obj2.type === "number")    { return( obj1.num == obj2.num ); }
+    else { return false; }
 }
 function applyMoveOrUpdateErrors(obj1, obj2)    { //I feel like this might be doing too much but i really dont know how to cut it down since i need the false from checkmove to know for errors
-    let tile = obj1.type === "tile" ? obj1 : obj2;
-    let number = obj1.type === "number" ? obj1 : obj2;
+    const tile = obj1.type === "tile" ? obj1 : obj2;
     if(gameState.board[tile.r][tile.c] != 0)    { return; }
+    const number = obj1.type === "number" ? obj1 : obj2;
     if(logic.checkMove(gameState, tile.r, tile.c, number.num))    {
         gameState.board[tile.r][tile.c] = number.num;
         ui.updateTile(tile.r, tile.c, number.num);
         ui.highlightTile(tile.r, tile.c, "removeHint");
+        activeHint = false; //messy fix idk what else to do
         ui.removeHintPopupElement();
         return true;
     }
@@ -93,23 +101,26 @@ function applyMoveOrUpdateErrors(obj1, obj2)    { //I feel like this might be do
     ui.setErrorCount(gameState.errors);
     return false;
 }
-function initializeGame(sd) {
-    gameState = logic.createGame(sd);
+
+function initializeGame(difficulty) {
+    gameState = logic.createGame(difficulty);
     gameState.solution = logic.generateBoard(); //in the future handle this server side maybe?
-    console.log(gameState.solution);
+    //console.log(gameState.solution);
     gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
     gameState.emptySpaces = logic.countEmptySpaces(gameState.board);
-    console.log(gameState.board);
+    //console.log(gameState.board);
 }
 function resetGame()  {
-    initializeGame(sd);
+    initializeGame(selectedDifficulty);
     gameState.errors = 0;
     gameState.hintsLeft = 3;
-    if(ls)  {
-        deselect(ls);
-        ls = null;
+    if(lastSelected)  {
+        deselect(lastSelected);
+        lastSelected = null;
     }
     ui.setErrorCount(gameState.errors);
+    ui.setHintCount(gameState.hintsLeft);
+    activeHint = false;
     ui.resetBoardElements(gameState.board);
     ui.clearHints();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
@@ -125,4 +136,5 @@ window.onload = function() {
     ui.createBoardElements(gameState.board);
     ui.addButtonFunctionality();
     ui.highlightButton("easy", "add");
+    ui.setHintCount(gameState.hintsLeft);
 }

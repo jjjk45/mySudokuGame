@@ -221,7 +221,7 @@ export {
     shuffle,
     bestCell,
     generateBoard,
-    fillRandomBoard, //remove in prod, export is only for tests
+    fillRandomBoard, //remove in prod, this export is only for tests
     isValid,
     countSolutions,
     addEmptySpaces,
