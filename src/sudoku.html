@@ -6,12 +6,12 @@
         <meta charset="UTF-8">
 
         <link rel="stylesheet" href="sudoku.css">
-        <script src="js/sudoku.js"></script>
+        <script type="module" src="./js/main.js"></script>
     </head>
     <body>
         <h1>Sudoku</h1>
         <hr>
-        <h2 id="errors" title="Errors">0</h2>
+        <h2 id="errors" title="Errors">loading...</h2>
 
         <!-- 9x9 Board -->
          <div id="board"></div>
@@ -19,12 +19,17 @@
          <div id="digits"></div>
 
          <div id="button-container">
-            <button id="reset" onclick="resetGame()">Reset</button>
+            <button id="reset">Reset</button>
             <button id="easy">Easy</button>
             <button id="medium">Medium</button>
             <button id="hard">Hard</button>
             <button id="veryHard">Very Hard</button>
-            <button id="hint">Hint</button>
+            <button id="hint">
+                <span class="hint-wrapper">
+                    Hint
+                    <span class="hint-badge" title="Hints Remaining">loading...</span>
+                </span>
+            </button>
             <button id="solve">Auto Solve</button>
         </div>
     </body>
