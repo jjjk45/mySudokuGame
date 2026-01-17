@@ -7,10 +7,11 @@ function createGame(difficulty) {
         board: null,
         solution: null,
         hintsLeft: 3,
+        activeHint: false,
         errors: 0,
         solving: false,
-        cancelSolve: false,
         difficulty: difficulty,
+        selectedDifficulty: "easy",
         emptySpaces: 0
     };
 }
@@ -111,7 +112,7 @@ function generateBoard()    {
     return board;
 }
 /**
- * recursively fills a random sudoku board, is called upon by generateBoard()
+ * recursively fills a random sudoku board, is called by generateBoard()
  * @returns boolean - true if board was filled, false if not
  * @note assumes board is valid at start, if not it will get stuck in infinite recursion
  */
@@ -211,7 +212,7 @@ function countEmptySpaces(brd)  {
  * @param {int} num
  * @returns {boolean}
  */
-function checkMove(gameState, r, c, num) {
+function isCorrectMove(gameState, r, c, num) {
     if(gameState.board[r][c] != 0)  { return false; }
     if(gameState.solution[r][c] != num) {return false; }
     return true;
@@ -226,5 +227,5 @@ export {
     countSolutions,
     addEmptySpaces,
     countEmptySpaces,
-    checkMove
+    isCorrectMove
 };

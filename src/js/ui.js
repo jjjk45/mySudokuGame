@@ -67,10 +67,10 @@ export function resetBoardElements(board)   {
     }
 }
 export function addButtonFunctionality() {
-    ["reset","easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(buttonText => {
-        document.getElementById(buttonText).addEventListener("click", () => {
+    ["reset", "easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(btnId => {
+        document.getElementById(btnId).addEventListener("click", () => {
             if(onButtonSelected)    {
-                onButtonSelected(buttonText);
+                onButtonSelected(btnId);
             }
         });
     });
@@ -78,52 +78,37 @@ export function addButtonFunctionality() {
 
 /**
  * @param {int} num
- * @param {"add"|"remove"} operation
+ * @param {boolean} highlight
  */
-export function highlightNumber(num, operation)   {
-    switch(operation)   {
-        case "add":
-            digitsArr[num].classList.add("number-selected");
-            break;
-        case "remove":
-            digitsArr[num].classList.remove("number-selected");
-            break;
-    }
+export function setNumberSelected(num, highlight)   {
+    digitsArr[num].classList.toggle("number-selected", highlight);
 }
-
-export function highlightTile(r, c, operation) {
-    const tileSelected = tilesArr[r][c];
-    switch(operation)   {
-        case "add":
-            tileSelected.classList.add("tile-selected");
-            break;
-        case "remove":
-            tileSelected.classList.remove("tile-selected");
-            break;
-        case "addHint":
-            tileSelected.classList.add("tile-hint");
-            break;
-        case "removeHint":
-            tileSelected.classList.remove("tile-hint");
-            break;
-    }
+export function setTileSelected(r, c, highlight)    {
+    tilesArr[r][c].classList.toggle("tile-selected", highlight);
+}
+export function setTileHint(r, c, highlight)    {
+    tilesArr[r][c].classList.toggle("tile-hint", highlight);
+}
+export function setTileAutoSolved(r, c, highlight)    {
+    tilesArr[r][c].classList.toggle("tile-solve", highlight);
 }
 export function updateTile(r, c, num)  {
     tilesArr[r][c].innerText = num;
 }
-
-export function highlightButton(button, operation)   {
-    let buttonSelected = document.getElementById(button);
-    if(operation === "add") { buttonSelected.classList.add(`${button}-clicked`); }
-    else if(operation === "remove") { buttonSelected.classList.remove(`${button}-clicked`); }
-    return;
+export function setButtonClicked(btn, highlight)   {
+    const buttonSelected = document.getElementById(btn); //need to make an array for this
+    buttonSelected.classList.toggle(`${btn}-clicked`, highlight);
+}
+export function setButtonDisabled(btn, disabled) {
+    const buttonSelected = document.getElementById(btn);
+    buttonSelected.disabled = disabled;
 }
 
 export function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
     removeHintPopupElement();
 }
-function clearSolve()   {
+export function clearSolved()   {
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
 }
 export function setErrorCount(num)  {
