@@ -1,13 +1,21 @@
 const tilesArr = Array(9).fill().map(() => Array(9).fill(0)); //to stop the costly getElementbyIds
-const digitsArr = Array(9).fill(0);
+const digitsArr = Array(10).fill(0); //index 0 isnt used because I start adding at i=1, need to think of a smarter way
 
-let onNumSelected;
-let onTileSelected; //I want to change these to consts to block their reassignment but dont know how to yet
-let onButtonSelected;
-export function registerHandlers(handlers)   {
-    onNumSelected = handlers.onNumSelected;
-    onTileSelected = handlers.onTileSelected;
-    onButtonSelected = handlers.onButtonSelected;
+const handlers = {
+    onNumSelected: () => {},
+    onTileSelected: () => {},
+    onButtonSelected: () => {}
+};
+export function registerHandlers(h) {
+    if(typeof h.onNumSelected === "function")   {
+        handlers.onNumSelected = h.onNumSelected;
+    }
+    if(typeof h.onTileSelected === "function")  {
+        handlers.onTileSelected = h.onTileSelected;
+    }
+    if(typeof h.onButtonSelected === "function")    {
+        handlers.onButtonSelected = h.onButtonSelected;
+    }
 }
 
 export function makeSelectableNumbers()    {
@@ -15,13 +23,7 @@ export function makeSelectableNumbers()    {
         let number = document.createElement("div");
         number.id = i;
         number.innerText = i;
-        number.addEventListener("click", () => {
-            if(onNumSelected)   {
-                onNumSelected(i);
-            } else {
-                throw new Error("callBacks.onNumSelected failed validation");
-            }
-        });
+        number.addEventListener("click", () => { handlers.onNumSelected(i) });
         number.classList.add("number");
         digitsArr[i] = number;
         document.getElementById("digits").appendChild(number);
@@ -43,13 +45,7 @@ export function createBoardElements(board)  {
             if(c==2 || c==5)    {
                 tile.classList.add("vertical-line");
             }
-            tile.addEventListener("click", () => {
-                if(onTileSelected)   {
-                    onTileSelected(r,c);
-                } else {
-                    throw new Error("callBacks.onTileSelected failed validation");
-                }
-            });
+            tile.addEventListener("click", () => { handlers.onTileSelected(r,c) });
             tile.classList.add("tile");
             document.getElementById("board").appendChild(tile);
         }
@@ -72,13 +68,7 @@ export function resetBoardElements(board)   {
 }
 export function addButtonFunctionality() {
     ["reset", "easy", "medium", "hard", "veryHard", "hint", "solve"].forEach(btnId => {
-        document.getElementById(btnId).addEventListener("click", () => {
-            if(onButtonSelected)    {
-                onButtonSelected(btnId);
-            } else {
-                throw new Error("callBacks.onButtonSelected failed validation");
-            }
-        });
+        document.getElementById(btnId).addEventListener("click", () => { handlers.onButtonSelected(btnId) });
     });
 }
 

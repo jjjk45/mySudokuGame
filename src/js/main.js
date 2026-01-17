@@ -64,7 +64,7 @@ function handleSelection(obj)   {
         return;
     }
     const move = getMove(obj, gameState.lastSelected);
-    if(gameState.board[move.r][move.c] != 0)    { return; }
+    if(!move || gameState.board[move.r][move.c] != 0)    { return; } //in the future add a log for this somehow
     if(logic.isCorrectMove(gameState, move.r, move.c, move.num))    {
         applyMove(gameState, move.r, move.c, move.num);
         deselect(gameState.lastSelected);
@@ -96,7 +96,7 @@ function isSameSelection(obj1, obj2)  {
 }
 function getMove(obj1, obj2)    {
     const tile = obj1.type === "tile" ? obj1 : obj2;
-    if(gameState.board[tile.r][tile.c] != 0)    { return; }
+    if(gameState.board[tile.r][tile.c] != 0)    { return null; }
     const number = obj1.type === "number" ? obj1 : obj2;
     return { r: tile.r, c: tile.c, num: number.num };
 }
@@ -116,7 +116,7 @@ function killActiveHint()   {
 
 function giveHint() {
     const obj = logic.bestCell(gameState.board, "min");
-    if(!gameState.activeHint && gameState.hintsLeft > 0 && obj.r != null)  { //if bestCell failed it will return an object with r: null
+    if(!gameState.activeHint && gameState.hintsLeft > 0 && obj) { //if bestCell failed obj will = null
         gameState.activeHint = { r: obj.r, c: obj.c};
         ui.setTileHint(obj.r, obj.c, true);
         ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //in the future when i implement debug mode make it so these do not have the plus ones
@@ -130,16 +130,20 @@ async function autoSolve()  {
     ui.clearHints();
     gameState.activeHint = null;
     gameState.solving = true;
-    if(await recSolve())  {
-        ui.setButtonDisabled("solve", false);
+    try {
+        const solved = await recSolve();
+        if (!solved) {
+            throw new Error("recSolve failed");
+        }
+    } finally {
         gameState.solving = false;
-        return;
+        ui.setButtonDisabled("solve", false);
     }
-    throw new Error("error in recSolve");
 }
 async function recSolve()   {
-    let { r, c, candidates } = logic.bestCell(gameState.board, "min");
-    if (r === null || c === null)   { return true; }
+    let obj = logic.bestCell(gameState.board, "min");
+    if(!obj)    { return true; }
+    let {r, c, candidates} = obj;
     for (const num of candidates) {
         applyMove(gameState, r, c, num);
         ui.setTileAutoSolved(r, c, true);

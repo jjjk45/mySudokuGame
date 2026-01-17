@@ -65,7 +65,7 @@ function isValid(brd, row, col, num)  {
  * @note doesn't check if board is 9x9 but row and column array checks are hardcoded for a 9x9 board hmmm
  */
 function bestCell(brd, mode)  {
-    let best = { r: null, c: null, candidates : [] };
+    let best = null;
     if(!brd)    {
         console.error('board error in bestCell()');
         return best;
@@ -143,18 +143,19 @@ function fillRandomBoard(brd, row = 0, col = 0) {
  * @note temporarily mutates the board but restores it before returning
  */
 function countSolutions(brd) {
-    let { r, c, candidates } = bestCell(brd, "min");
-    if (r === null) { return 1; }
+    let obj = bestCell(brd, "min");
+    if(!obj)    { return 1; }
+    let { r, c, candidates } = obj;
 
     let total = 0;
-    for (let num of candidates) {
+    for(let num of candidates) {
         brd[r][c] = num;
         total += countSolutions(brd);
-        if (total > 1) {
+        if(total > 1) {
             brd[r][c] = 0;
             return total;
         }
-        brd[r][c] = 0; // backtrack
+        brd[r][c] = 0; //backtrack
     }
     return total;
 }
