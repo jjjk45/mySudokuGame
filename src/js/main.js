@@ -23,7 +23,7 @@ function handleButtonSelected(btn)  {
             break;
         case "hint":    { //should i put all this logic in its own function like I do for solve?
             const obj = logic.bestCell(gameState.board, "min");
-            if(!gameState.activeHint && gameState.hintsLeft > 0 && obj.r)  { //if bestCell failed it will return an object with r: null
+            if(!gameState.activeHint && gameState.hintsLeft > 0 && obj.r != null)  { //if bestCell failed it will return an object with r: null
                 gameState.activeHint = true;
                 ui.setTileHint(obj.r, obj.c, true);
                 ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //if debug mode is on make it so these do not have the plus ones
