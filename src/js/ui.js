@@ -2,7 +2,7 @@ const tilesArr = Array(9).fill().map(() => Array(9).fill(0)); //to stop the cost
 const digitsArr = Array(9).fill(0);
 
 let onNumSelected;
-let onTileSelected;
+let onTileSelected; //I want to change these to consts to block their reassignment but dont know how to yet
 let onButtonSelected;
 export function registerHandlers(handlers)   {
     onNumSelected = handlers.onNumSelected;
@@ -18,6 +18,8 @@ export function makeSelectableNumbers()    {
         number.addEventListener("click", () => {
             if(onNumSelected)   {
                 onNumSelected(i);
+            } else {
+                throw new Error("callBacks.onNumSelected failed validation");
             }
         });
         number.classList.add("number");
@@ -44,6 +46,8 @@ export function createBoardElements(board)  {
             tile.addEventListener("click", () => {
                 if(onTileSelected)   {
                     onTileSelected(r,c);
+                } else {
+                    throw new Error("callBacks.onTileSelected failed validation");
                 }
             });
             tile.classList.add("tile");
@@ -71,6 +75,8 @@ export function addButtonFunctionality() {
         document.getElementById(btnId).addEventListener("click", () => {
             if(onButtonSelected)    {
                 onButtonSelected(btnId);
+            } else {
+                throw new Error("callBacks.onButtonSelected failed validation");
             }
         });
     });

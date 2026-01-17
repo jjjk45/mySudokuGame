@@ -1,7 +1,6 @@
 import * as logic from "./logic.js";
 import * as ui from "./ui.js";
 let gameState;
-let lastSelected = null; //last selected (either tile or number)
 
 function handleNumSelected(num)    {
     console.log(`Number Selected: ${num}`);
@@ -21,19 +20,11 @@ function handleButtonSelected(btn)  {
         case "reset":
             resetGame();
             break;
-        case "hint":    { //should i put all this logic in its own function like I do for solve?
-            const obj = logic.bestCell(gameState.board, "min");
-            if(!gameState.activeHint && gameState.hintsLeft > 0 && obj.r != null)  { //if bestCell failed it will return an object with r: null
-                gameState.activeHint = true;
-                ui.setTileHint(obj.r, obj.c, true);
-                ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //if debug mode is on make it so these do not have the plus ones
-                gameState.hintsLeft -= 1;
-                ui.setHintCount(gameState.hintsLeft);
-            }
+        case "hint":    {
+            giveHint();
             break;
         }
         case "solve":
-            ui.setButtonDisabled(btn, true);
             autoSolve();
             break;
         case "easy":
@@ -56,25 +47,35 @@ function handleButtonSelected(btn)  {
  * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} obj
  */
 function handleSelection(obj)   {
-    if(!lastSelected) {
+    if(!gameState.lastSelected) {
         select(obj);
-        lastSelected = obj;
+        gameState.lastSelected = obj;
         return;
     }
-    if(isSameSelection(lastSelected, obj)) {
+    if(isSameSelection(gameState.lastSelected, obj)) {
         deselect(obj);
-        lastSelected = null;
+        gameState.lastSelected = null;
         return;
     }
-    if(lastSelected.type === obj.type)    {
-        deselect(lastSelected);
+    if(gameState.lastSelected.type === obj.type)    {
+        deselect(gameState.lastSelected);
         select(obj);
-        lastSelected = obj;
+        gameState.lastSelected = obj;
         return;
     }
-    if(applyMoveOrUpdateErrors(lastSelected, obj) && lastSelected.type !== "tile")  { //need to replace this whole block with the helpers
-        deselect(lastSelected);
-        lastSelected = null;
+    const move = getMove(obj, gameState.lastSelected);
+    if(gameState.board[move.r][move.c] != 0)    { return; }
+    if(logic.isCorrectMove(gameState, move.r, move.c, move.num))    {
+        applyMove(gameState, move.r, move.c, move.num);
+        deselect(gameState.lastSelected);
+        gameState.lastSelected = null;
+        if(gameState.activeHint && gameState.activeHint.r === move.r && gameState.activeHint.c == move.c)   {
+            killActiveHint();
+        }
+        return;
+    } else {
+        gameState.errors += 1;
+        ui.setErrorCount(gameState.errors);
     }
 }
 /** helper functions for handleSelection()
@@ -93,47 +94,44 @@ function isSameSelection(obj1, obj2)  {
     if(obj1.type === "number" && obj2.type === "number")    { return( obj1.num == obj2.num ); }
     else { return false; }
 }
-function applyMoveOrUpdateErrors(obj1, obj2)    {
-    if(gameState.board[tile.r][tile.c] != 0)    { return; }
-    const number = obj1.type === "number" ? obj1 : obj2;
-    if(logic.isCorrectMove(gameState, tile.r, tile.c, number.num))    {
-        gameState.board[tile.r][tile.c] = number.num;
-        ui.updateTile(tile.r, tile.c, number.num);
-        ui.setTileHint(tile.r, tile.c, false);
-        ui.removeHintPopupElement();
-        gameState.activeHint = false;
-        return true;
-    }
-    gameState.errors += 1;
-    ui.setErrorCount(gameState.errors);
-    return false;
-}
-/*function getMove(obj1, obj2)    {
+function getMove(obj1, obj2)    {
     const tile = obj1.type === "tile" ? obj1 : obj2;
     if(gameState.board[tile.r][tile.c] != 0)    { return; }
     const number = obj1.type === "number" ? obj1 : obj2;
     return { r: tile.r, c: tile.c, num: number.num };
 }
-function validateMove(gameState, r, c, num) {
-    if(logic.isCorrectMove(gameState, tile.r, tile.c, number.num))  { return true; }
-    return false;
-}
 function applyMove(gameState, r, c, num)   {
-    gameState.board[tile.r][tile.c] = number.num;
-    ui.updateTile(tile.r, tile.c, number.num);
-    ui.setTileHint(tile.r, tile.c, false);  // I'm thinking about combining these 3 lines into a
-    ui.removeHintPopupElement();            // function called killActiveHint(), but I don't know
-    gameState.activeHint = false;           // if I want to pass it r,c rather than querying
-}*/
+    gameState.board[r][c] = num;
+    if(num !== 0)    {
+        ui.updateTile(r, c, num);
+    } else {
+        ui.updateTile(r, c, "");
+    }
+}
+function killActiveHint()   {
+    ui.clearHints();
+    ui.removeHintPopupElement();
+    gameState.activeHint = null;
+}
 
-
+function giveHint() {
+    const obj = logic.bestCell(gameState.board, "min");
+    if(!gameState.activeHint && gameState.hintsLeft > 0 && obj.r != null)  { //if bestCell failed it will return an object with r: null
+        gameState.activeHint = { r: obj.r, c: obj.c};
+        ui.setTileHint(obj.r, obj.c, true);
+        ui.createHintPopupElement(obj.r + 1, obj.c + 1, obj.candidates); //in the future when i implement debug mode make it so these do not have the plus ones
+        gameState.hintsLeft -= 1;
+        ui.setHintCount(gameState.hintsLeft);
+    }
+}
 async function autoSolve()  {
     if(gameState.solving == true)   { return; }
+    ui.setButtonDisabled("solve", true);  //passing "solve" could be buggy in the future if i rename it 0.o
     ui.clearHints();
-    gameState.activeHint = false;
+    gameState.activeHint = null;
     gameState.solving = true;
     if(await recSolve())  {
-        ui.setButtonDisabled("solve", false); //passing "solve" could be buggy in the future if i rename it 0.o
+        ui.setButtonDisabled("solve", false);
         gameState.solving = false;
         return;
     }
@@ -143,15 +141,13 @@ async function recSolve()   {
     let { r, c, candidates } = logic.bestCell(gameState.board, "min");
     if (r === null || c === null)   { return true; }
     for (const num of candidates) {
-        gameState.board[r][c] = num; //change this to applyMove in the future
-        ui.updateTile(r, c, num);
+        applyMove(gameState, r, c, num);
         ui.setTileAutoSolved(r, c, true);
 
         await new Promise(res => setTimeout(res, 0));
         if (await recSolve()) { return true; }
 
-        gameState.board[r][c] = 0;
-        ui.updateTile(r, c, "");
+        applyMove(gameState, r, c, 0)
         ui.setTileAutoSolved(r, c, false);
     }
     return false;
@@ -166,28 +162,26 @@ function initializeGame(difficulty) {
     //console.log(gameState.board);
 }
 function resetGame()  {
-    initializeGame(gameState.selectedDifficulty);
-    gameState.errors = 0;
-    gameState.hintsLeft = 3;
-    if(lastSelected)  {
-        deselect(lastSelected);
-        lastSelected = null;
+    if(gameState.lastSelected)  {
+        deselect(gameState.lastSelected);
+        gameState.lastSelected = null; //should i keep this line, this property is overwritten in the very next line?
     }
+    if(gameState.activeHint)    { killActiveHint(); }
+    initializeGame(gameState.selectedDifficulty);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
-    gameState.activeHint = false;
     ui.resetBoardElements(gameState.board);
-    ui.clearHints();
     ui.clearSolved();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
 }
 window.onload = function() {
     initializeGame("easy");
-    ui.registerHandlers({   //implement validation for these
+    const callBacks = {
         onNumSelected: handleNumSelected,
         onTileSelected: handleTileSelected,
         onButtonSelected: handleButtonSelected
-    });
+    }
+    ui.registerHandlers(callBacks);
     ui.makeSelectableNumbers();
     ui.createBoardElements(gameState.board);
     ui.addButtonFunctionality();

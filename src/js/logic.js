@@ -1,17 +1,20 @@
 /**
  * @param {"easy" | "medium" | "hard" | "veryHard"} difficulty
+ * @param {{r: int, c: int} | null} activeHint
+ * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} lastSelected
  * @returns a gamestate object
  */
 function createGame(difficulty) {
     return {
         board: null,
         solution: null,
+        lastSelected: null,
         hintsLeft: 3,
-        activeHint: false,
+        activeHint: null,
         errors: 0,
         solving: false,
         difficulty: difficulty,
-        selectedDifficulty: "easy",
+        selectedDifficulty: difficulty,
         emptySpaces: 0
     };
 }
