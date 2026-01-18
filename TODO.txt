@@ -1,0 +1,20 @@
+todo:
+    -Make UI pretty -- Add hamburger menu that folds downward when you press a symbol in the top-left
+        - Options
+            - Screenshake on errors
+            - # of errors allowed before forced reset
+            - Celebration on puzzle completion
+        - Hints -- limit to 3
+            - implement it so the tile with the most possible choices is told
+        - Special sudoku puzzles - not random, prefilled famous versions, maybe even impossible versions
+    -Add debug mode
+        - add tracker that shows how many masks/empty spaces were added, its not always feasible to have <~25 clues
+        - add console.log -- board, solutions, and mask application time
+    -Add unit tests
+    -Add enclosures to obscure sudoku generation logic
+    -Add stopwatch
+    -Add notes functionality
+    -Add more function hints for readability
+    -Make program behavior more readable with better function ordering
+    -I want to add seeds for random boards and ideally implement it with a leaderboard for who solved a seed the fastest/with the least errors
+        - maybe add users and include how many they've solved
