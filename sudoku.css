@@ -1,17 +1,22 @@
 :root {
     --header-font-size: 28px;
 }
+
+/* -------------------- Body & Typography -------------------- */
 body {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     text-align: center;
 }
-hr  {
-    width: 500px;
-}
+
 h1 {
     font-size: var(--header-font-size);
     margin: auto;
 }
+
+hr {
+    width: 500px;
+}
+
 #errors {
     font-size: var(--header-font-size);
     color: red;
@@ -19,30 +24,68 @@ h1 {
     padding-bottom: 5px;
 }
 
-#board  {
+/* -------------------- Board & Tiles -------------------- */
+#board {
     height: 450px;
     width: 450px;
-
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(9, 1fr);
 }
-.tile   {
-    border: 1px solid lightgray;
 
-    /* text */
+.tile {
+    border: 1px solid lightgray;
     font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    user-select: none;
 }
+
+.tile:active {
+    background: gray;
+    font-weight: bold;
+    font-size: 21px;
+    border: 1px solid black;
+}
+
+.tile-start {
+    background-color: whitesmoke;
+    cursor: default;
+}
+
+.tile-selected {
+    background-color: gray;
+    border: 1px solid black;
+}
+
+.tile-start.tile-selected {
+    background-color: #bbbbbb; /*the color addition between gray and lightskyblue, pretty smooth*/
+}
+
+.tile-hint {
+    background-color: lightskyblue;
+    border: 1px solid blue;
+}
+
+.tile-hint.tile-selected {
+    background-color: lavender;
+    /*background-color: #84a7bd; the color addition between gray and lightskyblue, kind of ugly*/
+    border: 1px solid purple;
+}
+
+.tile-solve {
+    background-color: pink;
+    border: 1px solid lightpink;
+}
+
+/* -------------------- Digits -------------------- */
 #digits {
     height: 50px;
     width: 450px;
-
     margin: 0 auto;
     gap: 2px;
     display: grid;
@@ -51,169 +94,114 @@ h1 {
 
 .number {
     border: 1px solid black;
-
-    /* text */
     font-size: 20px;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    user-select: none;
 }
 
-.number-selected    {
-    background-color:  gray;
+.number:active {
+    background: gray;
+    font-weight: bold;
+    font-size: 21px;
 }
 
-.tile-start {
-    background-color: whitesmoke;
-    cursor: default;
+.number-selected {
+    background-color: gray;
 }
 
-.horizontal-line    {
+/* -------------------- Grid Lines -------------------- */
+.horizontal-line {
     border-bottom: 1px solid black !important;
 }
 
-.vertical-line  {
+.vertical-line {
     border-right: 1px solid black !important;
 }
 
-#reset  {
+/* -------------------- Hint Popup -------------------- */
+.hint-popup {
+    position: absolute;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    font-size: 14px;
+    border-radius: 6px;
+    padding: 8px 0;
+}
+.hint-popup::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-100%, -50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+
+/* -------------------- Buttons -------------------- */
+#reset, #easy, #medium, #hard, #veryHard, #hint, #solve {
     width: 140px;
     position: fixed;
-    top: 10px;
     left: 10px;
     padding: 8px 12px;
     font-size: 16px;
     border-radius: 6px;
     cursor: pointer;
 }
-#reset:active   {
+
+#reset { top: 10px; }
+#easy { top: 54px; }
+#medium { top: 98px; }
+#hard { top: 142px; }
+#veryHard { top: 186px; }
+#hint { top: 230px; }
+#solve { top: 274px; }
+
+/* Button Active pseudo States */
+#reset:active { background: red; color: white; font-weight: bold; }
+#easy:active { color: white; background-color: limegreen; font-weight: bold; }
+#medium:active { color: white; background-color: blue; font-weight: bold; }
+#hard:active { background-color: red; color: white; font-weight: bold; }
+#veryHard:active { background-color: black; color: white; font-weight: bold; }
+#hint:active { background: lightskyblue; color: white; font-weight: bold; }
+#solve:active { background: pink; color: white; font-weight: bold; }
+
+/* Button Clicked States */
+.easy-clicked { background-color: limegreen; color: white; }
+.medium-clicked { background-color: blue; color: white; }
+.hard-clicked { background-color: red; color: white; }
+.veryHard-clicked { background-color: black; color: white; }
+
+/* -------------------- Hint Badge -------------------- */
+.hint-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(40%, -30%);
+    min-width: 1.4em;
+    height: 1.4em;
+    padding: 0.1em 0.3em;
+    border-radius: 999px;
     background: red;
     color: white;
-    font-weight: bold;
+    font-size: 0.75em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-    #easy  {
-        width: 140px;
-        position: fixed;
-        top: 54px;
-        left: 10px;
-        padding: 8px 12px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    #easy:active  {
-        color: white;
-        background-color: limegreen;
-        font-weight: bold;
-    }
-    .easy-clicked  {
-        background-color: limegreen;
-        color: white;
-    }
-    #medium  {
-        width: 140px;
-        position: fixed;
-        top: 98px;
-        left: 10px;
-        padding: 8px 12px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    #medium:active  {
-        color: white;
-        background-color: blue;
-        font-weight: bold;
-    }
-    .medium-clicked  {
-        background-color: blue;
-        color: white;
-    }
-    #hard  {
-        width: 140px;
-        position: fixed;
-        top: 142px;
-        left: 10px;
-        padding: 8px 12px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    #hard:active  {
-        background-color: red;
-        color: white;
-        font-weight: bold;
-    }
-    .hard-clicked  {
-        background-color: red;
-        color: white;
-    }
-    #veryHard  {
-        width: 140px;
-        position: fixed;
-        top: 186px;
-        left: 10px;
-        padding: 8px 12px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    #veryHard:active  {
-        background-color: black;
-        color: white;
-        font-weight: bold;
-    }
-    .veryHard-clicked  {
-        background-color: black;
-        color: white;
-    }
-#hint   {
-    width: 140px;
-    position: fixed;
-    top: 230px;
-    left: 10px;
-    padding: 8px 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-#hint:active    {
-    background: lightskyblue;
-    color: white;
-    font-weight: bold;
-}
-.tile-hint    {
-    background-color: lightskyblue;
-    border: 1px solid blue;
-}
-#solve   {
-    width: 140px;
-    position: fixed;
-    top: 274px;
-    left: 10px;
-    padding: 8px 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-#solve:active    {
-    background: pink;
-    color: white;
-    font-weight: bold;
-}
-.tile-solve    {
-    background-color: pink;
-    border: 1px solid lightpink;
-}
+
+/* -------------------- Media Queries -------------------- */
 @media (max-width: 750px) {
-    head, h1, h2, hr {
-        width: 85vw;
-    }
-    #errors {
-        padding-bottom: 15px;
-    }
+    head, h1, h2, hr { width: 85vw; }
+
+    #errors { padding-bottom: 15px; }
+
     body {
         display: flex;
         flex-direction: column;
@@ -225,7 +213,7 @@ h1 {
         width: 85vw;
         max-width: 450px;
         height: auto;
-        aspect-ratio:1/1;
+        aspect-ratio: 1/1;
         justify-content: center;
     }
 
@@ -237,23 +225,59 @@ h1 {
         padding-bottom: 15px;
         aspect-ratio: 9/1;
     }
-    #button-container   {
-        width:95vw;
-        vertical-align: middle;
-        line-height: normal;
-        display: flex;
-        gap: 1vw;
+
+    #button-container {
+        width: 95vw;
+        max-width: 450px;
+        justify-content: center;
+        margin-inline: auto;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.3rem;
     }
+
     #reset, #easy, #medium, #hard, #veryHard, #hint, #solve {
-        width: 13vw;
+        width: 100%;
         height: 60px;
-        position:static;
+        font-size: 0.75rem;
+        display: flex;
         align-items: center;
-        justify-items: center;
+        justify-content: center;
         text-align: center;
-        padding: 0 0 0 0;
-        font-size: 11px;
+        position: static;
+        padding: 0;
+    }
+
+    .hint-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .hint-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(30%, -40%);
+        min-width: 1.4em;
+        height: 1.4em;
+        padding: 0.1em;
+        border-radius: 999px;
+        background: red;
+        color: white;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hint-popup::after {
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        border-color: transparent transparent #555 transparent;
     }
 }
-
-
