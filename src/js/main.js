@@ -69,6 +69,11 @@ function handleSelection(obj)   {
         applyMove(gameState, move.r, move.c, move.num);
         deselect(gameState.lastSelected);
         gameState.lastSelected = null;
+        gameState.emptySpaces -= 1;
+        if(gameState.emptySpaces == 0)    {
+            const totalTime = Math.floor((performance.now() - gameState.startTime) / 1000); //ms to s, no magic numbers here
+            ui.showVictory(totalTime, gameState.errors);
+        }
         if(gameState.activeHint && gameState.activeHint.r === move.r && gameState.activeHint.c == move.c)   {
             killActiveHint();
         }
@@ -161,7 +166,12 @@ function initializeGame(difficulty) {
     gameState = logic.createGame(difficulty);
     gameState.solution = logic.generateBoard(); //in the future handle this server side maybe?
     //console.log(gameState.solution);
-    gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
+    //gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
+
+    /*for testing victory*/
+    gameState.board = gameState.solution.map(row => row.slice());
+    gameState.board[0][0] = 0;
+
     gameState.emptySpaces = logic.countEmptySpaces(gameState.board);
     //console.log(gameState.board);
 }
@@ -171,12 +181,14 @@ function resetGame()  {
         gameState.lastSelected = null; //should i keep this line, this property is overwritten in the very next line?
     }
     if(gameState.activeHint)    { killActiveHint(); }
+    ui.removeVictoryPopup();
     initializeGame(gameState.selectedDifficulty);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
     ui.resetBoardElements(gameState.board);
     ui.clearSolved();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
+    gameState.startTime = performance.now();
 }
 window.onload = function() {
     initializeGame("easy");
@@ -192,4 +204,5 @@ window.onload = function() {
     ui.setButtonClicked("easy", true);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
+    gameState.startTime = performance.now();
 }

@@ -4,12 +4,13 @@
  * @param {{type: "tile", r: int, c: int} | {type: "number", num: int}} lastSelected
  * @returns a gamestate object
  */
-function createGame(difficulty) {
+export function createGame(difficulty) {
     return {
         board: null,
         solution: null,
         lastSelected: null,
         hintsLeft: 3,
+        startTime: null,
         activeHint: null,
         errors: 0,
         solving: false,
@@ -64,7 +65,7 @@ function isValid(brd, row, col, num)  {
  * @throws will log error if mode is not "min" or "max"
  * @note doesn't check if board is 9x9 but row and column array checks are hardcoded for a 9x9 board hmmm
  */
-function bestCell(brd, mode)  {
+export function bestCell(brd, mode)  {
     let best = null;
     if(!brd)    {
         console.error('board error in bestCell()');
@@ -109,7 +110,7 @@ function bestCell(brd, mode)  {
  * @note only creates 9x9 boards, this is hardcoded in almost everything in this program I should fix
  * @returns returns randomly filled board
  */
-function generateBoard()    {
+export function generateBoard()    {
     const board = Array(9).fill().map(() => Array(9).fill(0));
     fillRandomBoard(board);
     return board;
@@ -181,6 +182,7 @@ function addEmptySpaces(brd, diff)  {
         veryHard: 17 //never seen it generate below 21 but i bet its possible
     }
     let removed = 0;
+
     while(removed<(81-difficultyValues[diff]) && positions.length>0)  {
         let pos = positions.pop();
         let row = pos.r, col = pos.c;
@@ -216,20 +218,16 @@ function countEmptySpaces(brd)  {
  * @param {int} num
  * @returns {boolean}
  */
-function isCorrectMove(gameState, r, c, num) {
+export function isCorrectMove(gameState, r, c, num) {
     if(gameState.board[r][c] != 0)  { return false; }
     if(gameState.solution[r][c] != num) {return false; }
     return true;
 }
-export {
-    createGame,
+export {     //remove in prod, this export is only for tests
     shuffle,
-    bestCell,
-    generateBoard,
-    fillRandomBoard, //remove in prod, this export is only for tests
+    fillRandomBoard,
     isValid,
     countSolutions,
     addEmptySpaces,
-    countEmptySpaces,
-    isCorrectMove
+    countEmptySpaces
 };

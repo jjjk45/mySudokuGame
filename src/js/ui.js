@@ -119,7 +119,6 @@ export function createHintPopupElement(r, c, nums) {
     const rect = hint.getBoundingClientRect();
     const popup = document.createElement("div");
     popup.id = "hint-popup";
-    popup.classList.add("hint-popup");
 
     const isMobile = window.matchMedia("(max-width: 750px)").matches; //do I hoist this?
     if (isMobile) {
@@ -137,5 +136,49 @@ export function createHintPopupElement(r, c, nums) {
 export function removeHintPopupElement()  {
     if(document.getElementById("hint-popup"))   {
         document.getElementById("hint-popup").remove();
+    }
+}
+/**
+ * @param {int} seconds
+ * @returns {H: int, M: int, S: int}
+ */
+function secondsToHMS(seconds)  {
+    if(seconds < 1) {
+        return {H: 0, M: 0, S: 0};
+    }
+    return {H: Math.floor(seconds/3600), M: Math.floor((seconds%3600)/60), S: seconds%60};
+}
+/**
+ * @param {int} seconds
+ * @param {int} errors
+ */
+export function showVictory(seconds, errors)   {
+    seconds = 46512;
+    const HMS = secondsToHMS(seconds);
+    const popup = document.createElement("div");
+
+    const timeParts = [];
+    if(HMS.H > 0)   { timeParts.push(HMS.H == 1 ? "1 hour" : `${HMS.H} hours`); }
+    if(HMS.M > 0)   { timeParts.push(HMS.M == 1 ? "1 minute" : `${HMS.M} minutes`); }
+    if(HMS.S > 0)   { timeParts.push(HMS.S == 1 ? "1 second" : `${HMS.S} seconds`); }
+    let timeText = "";
+    while(timeParts.length > 0) {   //this is actually awful but ive been on reels all day
+        if(timeParts.length >= 3)    {
+            timeText += timeParts.shift() + ", ";
+        } else if(timeParts.length == 2)  {
+            timeText += timeParts.shift() + ", and ";
+        } else {
+            timeText += timeParts.shift();
+        }
+    }
+
+    const errorText = errors == 1 ? "1 error" : `${errors} errors`;
+    popup.id = "victory-popup";
+    popup.textContent = `You completed Sudoku in ${timeText} with ${errorText}!`;
+    document.getElementById("board").appendChild(popup);
+}
+export function removeVictoryPopup()  {
+    if(document.getElementById("victory-popup"))   {
+        document.getElementById("victory-popup").remove();
     }
 }
