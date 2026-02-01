@@ -102,7 +102,6 @@ export function setButtonDisabled(btn, disabled) {
 
 export function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
-    removeHintPopupElement();
 }
 export function clearSolved()   {
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
@@ -142,42 +141,40 @@ export function removeHintPopupElement()  {
  * @param {int} seconds
  * @returns {H: int, M: int, S: int}
  */
-function secondsToHMS(seconds)  {
-    if(seconds < 1) {
+function milliSecondsToHMSM(ms)  {
+    if(ms < 1) {
         return {H: 0, M: 0, S: 0};
     }
-    return {H: Math.floor(seconds/3600), M: Math.floor((seconds%3600)/60), S: seconds%60};
+    const seconds = Math.floor(ms/1000);
+    return {
+        H: Math.floor(seconds/3600),
+        M: Math.floor((seconds%3600)/60),
+        S: seconds%60,
+        ms: ms%1000
+    };
 }
 /**
  * @param {int} seconds
  * @param {int} errors
  */
-export function showVictory(seconds, errors)   {
-    seconds = 46512;
-    const HMS = secondsToHMS(seconds);
-    const popup = document.createElement("div");
-
-    const timeParts = [];
-    if(HMS.H > 0)   { timeParts.push(HMS.H == 1 ? "1 hour" : `${HMS.H} hours`); }
-    if(HMS.M > 0)   { timeParts.push(HMS.M == 1 ? "1 minute" : `${HMS.M} minutes`); }
-    if(HMS.S > 0)   { timeParts.push(HMS.S == 1 ? "1 second" : `${HMS.S} seconds`); }
-    let timeText = "";
-    while(timeParts.length > 0) {   //this is actually awful but ive been on reels all day
-        if(timeParts.length >= 3)    {
-            timeText += timeParts.shift() + ", ";
-        } else if(timeParts.length == 2)  {
-            timeText += timeParts.shift() + ", and ";
-        } else {
-            timeText += timeParts.shift();
-        }
-    }
-
+export function createVictoryPopupElement(ms, errors)   {
+    if(document.getElementById("victory-popup"))   { return; }
+    //ms = 85546512; //test 23:45:46.512
+    const HMSM = milliSecondsToHMSM(ms);
+    const displaySeconds = HMSM.S.toString().padStart(2, 0) + "." + HMSM.ms.toString().padStart(3, 0);
+    const displayMinutes = HMSM.H > 0 ?
+        HMSM.M.toString().padStart(2, 0) :
+        HMSM.M.toString();
+    const timeText = HMSM.H > 0 ?
+        `${HMSM.H}:${displayMinutes}:${displaySeconds}` :
+        `${displayMinutes}:${displaySeconds}`;
     const errorText = errors == 1 ? "1 error" : `${errors} errors`;
+    const popup = document.createElement("div");
     popup.id = "victory-popup";
     popup.textContent = `You completed Sudoku in ${timeText} with ${errorText}!`;
     document.getElementById("board").appendChild(popup);
 }
-export function removeVictoryPopup()  {
+export function removeVictoryPopupElement()  {
     if(document.getElementById("victory-popup"))   {
         document.getElementById("victory-popup").remove();
     }

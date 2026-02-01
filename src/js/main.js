@@ -70,9 +70,9 @@ function handleSelection(obj)   {
         deselect(gameState.lastSelected);
         gameState.lastSelected = null;
         gameState.emptySpaces -= 1;
-        if(gameState.emptySpaces == 0)    {
-            const totalTime = Math.floor((performance.now() - gameState.startTime) / 1000); //ms to s, no magic numbers here
-            ui.showVictory(totalTime, gameState.errors);
+        if(gameState.emptySpaces <= 0)    { //should i just do ==?
+            const totalTime = Math.floor(performance.now() - gameState.startTime);
+            ui.createVictoryPopupElement(totalTime, gameState.errors);
         }
         if(gameState.activeHint && gameState.activeHint.r === move.r && gameState.activeHint.c == move.c)   {
             killActiveHint();
@@ -109,8 +109,10 @@ function applyMove(gameState, r, c, num)   {
     gameState.board[r][c] = num;
     if(num !== 0)    {
         ui.updateTile(r, c, num);
+        return true;
     } else {
         ui.updateTile(r, c, "");
+        return false;
     }
 }
 function killActiveHint()   {
@@ -132,12 +134,14 @@ function giveHint() {
 async function autoSolve()  {
     if(gameState.solving == true)   { return; }
     ui.setButtonDisabled("solve", true);  //passing "solve" could be buggy in the future if i rename it 0.o
-    ui.clearHints();
-    gameState.activeHint = null;
+    killActiveHint();
     gameState.solving = true;
     try {
         const solved = await recSolve();
-        if (!solved) {
+        if(solved)  {
+            const totalTime = Math.floor(performance.now() - gameState.startTime);
+            ui.createVictoryPopupElement(totalTime, gameState.errors);
+        } else {
             throw new Error("recSolve failed");
         }
     } finally {
@@ -166,12 +170,10 @@ function initializeGame(difficulty) {
     gameState = logic.createGame(difficulty);
     gameState.solution = logic.generateBoard(); //in the future handle this server side maybe?
     //console.log(gameState.solution);
-    //gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
-
-    /*for testing victory*/
+    gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
+    /*for testing victory
     gameState.board = gameState.solution.map(row => row.slice());
-    gameState.board[0][0] = 0;
-
+    gameState.board[0][0] = 0;*/
     gameState.emptySpaces = logic.countEmptySpaces(gameState.board);
     //console.log(gameState.board);
 }
@@ -181,7 +183,7 @@ function resetGame()  {
         gameState.lastSelected = null; //should i keep this line, this property is overwritten in the very next line?
     }
     if(gameState.activeHint)    { killActiveHint(); }
-    ui.removeVictoryPopup();
+    ui.removeVictoryPopupElement();
     initializeGame(gameState.selectedDifficulty);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
