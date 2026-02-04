@@ -1,6 +1,7 @@
 import * as logic from "./logic.js";
 import * as ui from "./ui.js";
 let gameState;
+
 function handleNumSelected(num)    {
     console.log(`Number Selected: ${num}`);
     handleSelection({type: "number", num: num});
@@ -34,13 +35,13 @@ function handleButtonSelected(btn)  {
                 ui.setButtonClicked(btn, true);
                 ui.setButtonClicked(gameState.difficulty, false);
                 gameState.selectedDifficulty = btn;
-                resetGame();
-            }
+                resetGame();                }
             break;
         default:
             throw new Error(`Invalid button: ${btn}`);
     }
 }
+
 function handleSelection(obj)   {
     if(!gameState.lastSelected) {
         select(obj);
@@ -64,6 +65,11 @@ function handleSelection(obj)   {
         applyMove(gameState, move.r, move.c, move.num);
         deselect(gameState.lastSelected);
         gameState.lastSelected = null;
+        gameState.emptySpaces -= 1;
+        if(gameState.emptySpaces <= 0)    {
+            const totalTime = Math.floor(performance.now() - gameState.startTime);
+            ui.createVictoryPopupElement(totalTime, gameState.errors);
+        }
         if(gameState.activeHint && gameState.activeHint.r === move.r && gameState.activeHint.c == move.c)   {
             killActiveHint();
         }
@@ -96,8 +102,10 @@ function applyMove(gameState, r, c, num)   {
     gameState.board[r][c] = num;
     if(num !== 0)    {
         ui.updateTile(r, c, num);
+        return true;
     } else {
         ui.updateTile(r, c, "");
+        return false;
     }
 }
 function killActiveHint()   {
@@ -105,6 +113,7 @@ function killActiveHint()   {
     ui.removeHintPopupElement();
     gameState.activeHint = null;
 }
+
 function giveHint() {
     const obj = logic.bestCell(gameState.board, "min");
     if(!gameState.activeHint && gameState.hintsLeft > 0 && obj) {
@@ -118,12 +127,14 @@ function giveHint() {
 async function autoSolve()  {
     if(gameState.solving == true)   { return; }
     ui.setButtonDisabled("solve", true);
-    ui.clearHints();
-    gameState.activeHint = null;
+    killActiveHint();
     gameState.solving = true;
     try {
         const solved = await recSolve();
-        if (!solved) {
+        if(solved)  {
+            const totalTime = Math.floor(performance.now() - gameState.startTime);
+            ui.createVictoryPopupElement(totalTime, gameState.errors);
+        } else {
             throw new Error("recSolve failed");
         }
     } finally {
@@ -138,31 +149,35 @@ async function recSolve()   {
     for (const num of candidates) {
         applyMove(gameState, r, c, num);
         ui.setTileAutoSolved(r, c, true);
+
         await new Promise(res => setTimeout(res, 0));
         if (await recSolve()) { return true; }
+
         applyMove(gameState, r, c, 0)
         ui.setTileAutoSolved(r, c, false);
     }
     return false;
 }
+
 function initializeGame(difficulty) {
     gameState = logic.createGame(difficulty);
     gameState.solution = logic.generateBoard();
     gameState.board = logic.addEmptySpaces(gameState.solution, gameState.difficulty);
     gameState.emptySpaces = logic.countEmptySpaces(gameState.board);
-}
+    }
 function resetGame()  {
     if(gameState.lastSelected)  {
         deselect(gameState.lastSelected);
-        gameState.lastSelected = null;
-    }
+        gameState.lastSelected = null;     }
     if(gameState.activeHint)    { killActiveHint(); }
+    ui.removeVictoryPopupElement();
     initializeGame(gameState.selectedDifficulty);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
     ui.resetBoardElements(gameState.board);
     ui.clearSolved();
     console.log(`game reset: ${81 - gameState.emptySpaces} starting tiles`);
+    gameState.startTime = performance.now();
 }
 window.onload = function() {
     initializeGame("easy");
@@ -178,4 +193,5 @@ window.onload = function() {
     ui.setButtonClicked("easy", true);
     ui.setErrorCount(gameState.errors);
     ui.setHintCount(gameState.hintsLeft);
+    gameState.startTime = performance.now();
 }

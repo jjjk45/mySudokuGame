@@ -1,4 +1,5 @@
-const tilesArr = Array(9).fill().map(() => Array(9).fill(0)); const digitsArr = Array(10).fill(0);
+const tilesArr = Array(9).fill().map(() => Array(9).fill(0));
+const digitsArr = Array(10).fill(0);
 const handlers = {
     onNumSelected: () => {},
     onTileSelected: () => {},
@@ -15,6 +16,7 @@ export function registerHandlers(h) {
         handlers.onButtonSelected = h.onButtonSelected;
     }
 }
+
 export function makeSelectableNumbers()    {
     for (let i=1; i<=9; i++) {
         let number = document.createElement("div");
@@ -68,6 +70,11 @@ export function addButtonFunctionality() {
         document.getElementById(btnId).addEventListener("click", () => { handlers.onButtonSelected(btnId) });
     });
 }
+
+/**
+ * @param {int} num
+ * @param {boolean} highlight
+ */
 export function setNumberSelected(num, highlight)   {
     digitsArr[num].classList.toggle("number-selected", highlight);
 }
@@ -84,15 +91,16 @@ export function updateTile(r, c, num)  {
     tilesArr[r][c].innerText = num;
 }
 export function setButtonClicked(btn, highlight)   {
-    const buttonSelected = document.getElementById(btn);     buttonSelected.classList.toggle(`${btn}-clicked`, highlight);
+    const buttonSelected = document.getElementById(btn);
+    buttonSelected.classList.toggle(`${btn}-clicked`, highlight);
 }
 export function setButtonDisabled(btn, disabled) {
     const buttonSelected = document.getElementById(btn);
     buttonSelected.disabled = disabled;
 }
+
 export function clearHints() {
     document.querySelectorAll(".tile-hint").forEach(t => t.classList.remove("tile-hint"));
-    removeHintPopupElement();
 }
 export function clearSolved()   {
     document.querySelectorAll(".tile-solve").forEach(t => t.classList.remove("tile-solve"));
@@ -109,8 +117,9 @@ export function createHintPopupElement(r, c, nums) {
     const rect = hint.getBoundingClientRect();
     const popup = document.createElement("div");
     popup.id = "hint-popup";
-    popup.classList.add("hint-popup");
-    const isMobile = window.matchMedia("(max-width: 750px)").matches;     if (isMobile) {
+
+    const isMobile = window.matchMedia("(max-width: 750px)").matches;
+    if (isMobile) {
         popup.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
         popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
         popup.style.transform = "translateX(-50%)";
@@ -125,5 +134,46 @@ export function createHintPopupElement(r, c, nums) {
 export function removeHintPopupElement()  {
     if(document.getElementById("hint-popup"))   {
         document.getElementById("hint-popup").remove();
+    }
+}
+/**
+ * @param {int} seconds
+ * @returns {H: int, M: int, S: int}
+ */
+function milliSecondsToHMSM(ms)  {
+    if(ms < 1) {
+        return {H: 0, M: 0, S: 0};
+    }
+    const seconds = Math.floor(ms/1000);
+    return {
+        H: Math.floor(seconds/3600),
+        M: Math.floor((seconds%3600)/60),
+        S: seconds%60,
+        ms: ms%1000
+    };
+}
+/**
+ * @param {int} seconds
+ * @param {int} errors
+ */
+export function createVictoryPopupElement(ms, errors)   {
+    if(document.getElementById("victory-popup"))   { return; }
+        const HMSM = milliSecondsToHMSM(ms);
+    const displaySeconds = HMSM.S.toString().padStart(2, 0) + "." + HMSM.ms.toString().padStart(3, 0);
+    const displayMinutes = HMSM.H > 0 ?
+        HMSM.M.toString().padStart(2, 0) :
+        HMSM.M.toString();
+    const timeText = HMSM.H > 0 ?
+        `${HMSM.H}:${displayMinutes}:${displaySeconds}` :
+        `${displayMinutes}:${displaySeconds}`;
+    const errorText = errors == 1 ? "1 error" : `${errors} errors`;
+    const popup = document.createElement("div");
+    popup.id = "victory-popup";
+    popup.textContent = `You completed Sudoku in ${timeText} with ${errorText}!`;
+    document.getElementById("board").appendChild(popup);
+}
+export function removeVictoryPopupElement()  {
+    if(document.getElementById("victory-popup"))   {
+        document.getElementById("victory-popup").remove();
     }
 }
