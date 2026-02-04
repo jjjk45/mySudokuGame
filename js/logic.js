@@ -113,7 +113,7 @@ function countSolutions(brd) {
         brd[r][c] = 0;     }
     return total;
 }
-function addEmptySpaces(brd, diff)  {
+export function addEmptySpaces(brd, diff)  {
     const newBoard = brd.map(row => row.slice());
     const positions = [];
     for(let r=0; r<9; r++)  {
