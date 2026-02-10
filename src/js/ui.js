@@ -1,5 +1,5 @@
-const tilesArr = Array(9).fill().map(() => Array(9).fill(0)); //to stop the costly getElementbyIds
-const digitsArr = Array(10).fill(0); //index 0 isnt used because I start adding at i=1, need to think of a smarter way
+const tileRefs = Array(9).fill().map(() => Array(9).fill(0)); //to stop the costly getElementbyIds
+const digitRefs = Array(10).fill(0); //index 0 isnt used because I start adding at i=1, need to think of a smarter way
 
 const handlers = {
     onNumSelected: () => {},
@@ -7,7 +7,7 @@ const handlers = {
     onButtonSelected: () => {}
 };
 export function registerHandlers(h) {
-    if(typeof h.onNumSelected === "function")   {
+    if(typeof h.onNumSelected === "function")   { //i thought this wasnt useful, removed it, and then I broke it so it will stay
         handlers.onNumSelected = h.onNumSelected;
     }
     if(typeof h.onTileSelected === "function")  {
@@ -25,7 +25,7 @@ export function makeSelectableNumbers()    {
         number.innerText = i;
         number.addEventListener("click", () => { handlers.onNumSelected(i) });
         number.classList.add("number");
-        digitsArr[i] = number;
+        digitRefs[i] = number;
         document.getElementById("digits").appendChild(number);
     }
 }
@@ -34,7 +34,7 @@ export function createBoardElements(board)  {
         for (let c=0; c<9; c++) {
             let tile = document.createElement("div");
             tile.id = r.toString() + "-" + c.toString();
-            tilesArr[r][c] = tile;
+            tileRefs[r][c] = tile;
             if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
@@ -55,7 +55,7 @@ export function resetBoardElements(board)   {
     for (let r=0; r<9; r++) {
         for (let c=0; c<9; c++) {
             let tile = document.getElementById(r.toString() + "-" + c.toString());
-            tilesArr[r][c] = tile;
+            tileRefs[r][c] = tile;
             if(board[r][c] != 0)  {
                 tile.innerText = board[r][c];
                 tile.classList.add("tile-start");
@@ -77,19 +77,19 @@ export function addButtonFunctionality() {
  * @param {boolean} highlight
  */
 export function setNumberSelected(num, highlight)   {
-    digitsArr[num].classList.toggle("number-selected", highlight);
+    digitRefs[num].classList.toggle("number-selected", highlight);
 }
 export function setTileSelected(r, c, highlight)    {
-    tilesArr[r][c].classList.toggle("tile-selected", highlight);
+    tileRefs[r][c].classList.toggle("tile-selected", highlight);
 }
 export function setTileHint(r, c, highlight)    {
-    tilesArr[r][c].classList.toggle("tile-hint", highlight);
+    tileRefs[r][c].classList.toggle("tile-hint", highlight);
 }
 export function setTileAutoSolved(r, c, highlight)    {
-    tilesArr[r][c].classList.toggle("tile-solve", highlight);
+    tileRefs[r][c].classList.toggle("tile-solve", highlight);
 }
 export function updateTile(r, c, num)  {
-    tilesArr[r][c].innerText = num;
+    tileRefs[r][c].innerText = num;
 }
 export function setButtonClicked(btn, highlight)   {
     const buttonSelected = document.getElementById(btn); //need to make an array for this

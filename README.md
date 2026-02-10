@@ -1,4 +1,6 @@
-# Sudoku-Game
+# Sudoku Game
 
-Simple Sudoku Game built with [Kenny Yip Coding's YouTube tutorial](https://www.youtube.com/watch?v=S4uRtTb8U-U) as a base
+Sudoku Game built with [Kenny Yip Coding's tutorial](https://www.youtube.com/watch?v=S4uRtTb8U-U) as a base
 
+Please try on mobile :)
+## [link](https://jjjk45.github.io/mySudokuGame/)

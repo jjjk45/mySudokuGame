@@ -65,7 +65,7 @@ function isValid(brd, row, col, num)  {
  * @throws will log error if mode is not "min" or "max"
  * @note doesn't check if board is 9x9 but row and column array checks are hardcoded for a 9x9 board hmmm
  */
-export function bestCell(brd, mode)  {
+export function bestCell(brd, mode)  { //i wish js had built in enum support so bad
     let best = null;
     if(!brd)    {
         console.error('board error in bestCell()');
@@ -73,7 +73,7 @@ export function bestCell(brd, mode)  {
     }
     let bestCount;
     if(mode === "min")  {
-        bestCount = 10;
+        bestCount = 10; //magic number? what should i name this
     } else if(mode === "max")  {
         bestCount = 0;
     } else {
@@ -108,11 +108,28 @@ export function bestCell(brd, mode)  {
 }
 /**
  * @note only creates 9x9 boards, this is hardcoded in almost everything in this program I should fix
+ * @param {function} fillType function for injecting specific board generation, bad fix to make unit testing easier
  * @returns returns randomly filled board
  */
-export function generateBoard()    {
+export function generateBoard(fillType = fillRandomBoard)    {
     const board = Array(9).fill().map(() => Array(9).fill(0));
-    fillRandomBoard(board);
+    if(typeof fillType != "function")   {
+        throw new Error("generateBoard requires a fill function");
+    }
+    if(fillType(board) != true)  {
+        console.error("board generation error");
+        return ([   //should i make this a global?
+            [1,2,3,4,5,6,7,8,9],
+            [4,5,6,7,8,9,1,2,3],
+            [7,8,9,1,2,3,4,5,6],
+            [2,3,4,5,6,7,8,9,1],
+            [5,6,7,8,9,1,2,3,4],
+            [8,9,1,2,3,4,5,6,7],
+            [3,4,5,6,7,8,9,1,2],
+            [6,7,8,9,1,2,3,4,5],
+            [9,1,2,3,4,5,6,7,8]
+        ]);
+    }
     return board;
 }
 /**
